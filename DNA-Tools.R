@@ -2,7 +2,6 @@
 library(shiny)
 library(shinythemes)
 
-
 # Define UI
 ui <- fluidPage(theme = shinytheme("darkly"),
                 tags$style(HTML("
@@ -82,6 +81,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 navbarPage(
                   # theme = "cerulean",  # <--- To use a theme, uncomment this
                   "DNA Tools",
+                  id = "selected_tab",
+                  
+                  #####################################
+                  # 1. Tool 1: Get reverse complement
+                  #####################################
                   
                   tabPanel("Reverse Complement",
                            radioButtons(
@@ -95,7 +99,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              column( width = 12, 
                              tags$h3("Input Sequence:"),
                              textAreaInput("txt1", "Nucleotide sequence:", "", width="100%", rows = 10),
-                             actionButton("submit", "Submit"))
+                             actionButton("submit_reverse_comp", "Submit"))
                            ), 
                            
                            fluidRow(
@@ -107,8 +111,23 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                   div(style = "text-align: right;",
                                       actionButton("copy_sequence", "Copy to Clipboard")))))
                   ), 
-                  # Next panels, tabPanel
-                  tabPanel("Six Frame Translation", "This feature will be built soon"),
+                  
+                  #########################
+                  # 2. Tool 2: Translation 
+                  #########################
+                  
+                  tabPanel("Six Frame Translation",
+                  fluidRow(
+                    column( width = 12, 
+                            tags$h3("Input Sequence:"),
+                            textAreaInput("txt2", "Nucleotide sequence:", "", width="100%", rows = 10),
+                            actionButton("submit", "Submit")))
+                  ), 
+         
+                  ########################
+                  # 3. Get subsequence
+                  ########################
+                  
                   tabPanel("Get Subsequence", "This feature will be built soon")
                   
                 ) # navbarPage
@@ -116,10 +135,16 @@ ui <- fluidPage(theme = shinytheme("darkly"),
 
 
 # Define server function
+
+# Define server function
 server <- function(input, output) {
   
+  #####################################
+  # 1. Tool 1: Get reverse complement
+  #####################################
+  
   # Run calculation only when Submit is clicked
-  sequence_data <- eventReactive(input$submit, {
+  sequence_data <- eventReactive(input$submit_reverse_comp, {
     
     # Get input sequence
     text <- input$txt1
@@ -178,13 +203,14 @@ server <- function(input, output) {
     if (header != "") {
       paste(header, reverse_complement, sep = "\n")
     } else {
-     reverse_complement
+      reverse_complement
     }
   })
   
   # Print text at beginning
   output$txtout <- renderUI({
-    if (input$submit == 0) {
+    
+    if (input$submit_reverse_comp == 0) {
       return(tags$pre(
         style = "font-style: italic;",
         "Your reverse complement sequence will appear here."
@@ -194,7 +220,69 @@ server <- function(input, output) {
     tags$pre(sequence_data())
   })
   
-} # server
+  
+  #########################
+  # 2. Tool 2: Translation
+  #########################
+  
+  codon_table <- data.frame(
+    Codon = c(
+      "TTT", "TTC", "TTA", "TTG",
+      "TCT", "TCC", "TCA", "TCG",
+      "TAT", "TAC", "TAA", "TAG",
+      "TGT", "TGC", "TGA", "TGG",
+      "CTT", "CTC", "CTA", "CTG",
+      "CCT", "CCC", "CCA", "CCG",
+      "CAT", "CAC", "CAA", "CAG",
+      "CGT", "CGC", "CGA", "CGG",
+      "ATT", "ATC", "ATA", "ATG",
+      "ACT", "ACC", "ACA", "ACG",
+      "AAT", "AAC", "AAA", "AAG",
+      "AGT", "AGC", "AGA", "AGG",
+      "GTT", "GTC", "GTA", "GTG",
+      "GCT", "GCC", "GCA", "GCG",
+      "GAT", "GAC", "GAA", "GAG",
+      "GGT", "GGC", "GGA", "GGG"
+    ),
+    Amino_Acid = c(
+      "F", "F", "L", "L",
+      "S", "S", "S", "S",
+      "Y", "Y", "*", "*",
+      "C", "C", "*", "W",
+      "L", "L", "L", "L",
+      "P", "P", "P", "P",
+      "H", "H", "Q", "Q",
+      "R", "R", "R", "R",
+      "I", "I", "I", "M",
+      "T", "T", "T", "T",
+      "N", "N", "K", "K",
+      "S", "S", "R", "R",
+      "V", "V", "V", "V",
+      "A", "A", "A", "A",
+      "D", "D", "E", "E",
+      "G", "G", "G", "G"
+    )
+  )
+  
+  translation_data <- eventReactive(input$submit_translation, {
+    
+    # Translation code goes here
+    
+  })
+  
+  
+  ########################
+  # 3. Get subsequence
+  ########################
+  
+  subsequence_data <- eventReactive(input$submit_subsequence, {
+    
+    # Subsequence code goes here
+    
+  })
+  
+}
+
 
 # Create Shiny object
 shinyApp(ui = ui, server = server)
