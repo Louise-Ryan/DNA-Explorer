@@ -217,15 +217,16 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                            conditionalPanel(
                              condition = "input.submit_translation > 0",
                              div(style = "text-align: right;",
-                                 actionButton("copy_translation", "Copy to Clipboard")))))
-                  ),
+                                 actionButton("copy_translation", "Copy to Clipboard"))))
+                    ),
+                  
                   # Translation summary
                   conditionalPanel(
                     condition = "input.submit_translation > 0",
                     fluidRow(
                       column(width = 12,
                              h3("Translation Summary:"),
-                             tableOutput("translation_summary")))
+                             tableOutput("translation_summary"))))
                     ),
                   
          
@@ -579,7 +580,7 @@ server <- function(input, output) {
     summary <- translation_data()$summary
     colnames(summary) <- gsub("_", " ", colnames(summary))
     summary
-  }, digits = 0, align = "c")
+  }, digits = 0)
   
   
   ########################
