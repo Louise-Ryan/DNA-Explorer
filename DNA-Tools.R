@@ -210,6 +210,14 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                             textAreaInput("txt2", "Nucleotide sequence:", "", width="100%", rows = 10),
                             actionButton("submit_translation", "Submit"))
                   ), 
+                  # Translation summary
+                  conditionalPanel(
+                    condition = "input.submit_translation > 0",
+                    fluidRow(
+                      column(width = 12,
+                             h3("Translation Summary:"),
+                             tableOutput("translation_summary")))
+                    ),
                   fluidRow(
                     column(width = 12,
                            h3("Six Frame Translation:"),
@@ -217,17 +225,9 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                            conditionalPanel(
                              condition = "input.submit_translation > 0",
                              div(style = "text-align: right;",
-                                 actionButton("copy_translation", "Copy to Clipboard"))))
+                                 actionButton("copy_translation", "Copy to Clipboard")))))
                     ),
-                  
-                  # Translation summary
-                  conditionalPanel(
-                    condition = "input.submit_translation > 0",
-                    fluidRow(
-                      column(width = 12,
-                             h3("Translation Summary:"),
-                             tableOutput("translation_summary"))))
-                    ),
+      
                   
          
                   ########################
@@ -455,7 +455,20 @@ server <- function(input, output) {
       all_amino_strings <- c(all_amino_strings, translations)
       
       # Add frame header
-      translations <- paste0(">Frame_", frame, "\n", translations)
+      #translations <- paste0(">Frame_", frame, "\n", translations)
+      
+      # Split translation into lines of 80 characters
+      wrapped_translation <- vapply(
+        seq(1, nchar(translations), by = 80),
+        function(x) substr(translations, x, x + 79),
+        character(1)
+      )
+      
+      # Add frame header
+      translations <- paste0(
+        ">Frame_", frame, "\n",
+        paste(wrapped_translation, collapse = "\n")
+      )
       
       # Store completed translation
       all_translations <- c(all_translations, translations)
@@ -580,7 +593,7 @@ server <- function(input, output) {
     summary <- translation_data()$summary
     colnames(summary) <- gsub("_", " ", colnames(summary))
     summary
-  }, digits = 0)
+  }, digits = 0, align = "c")
   
   
   ########################
