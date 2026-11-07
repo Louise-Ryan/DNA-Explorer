@@ -36,6 +36,80 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 
                   /* Set minimum and maximum output box height and enable scrolling */
                   #txtout {min-height: 150px; max-height: 300px; overflow-y: auto;}
+                  
+                  /* Make translation summary container full width */
+                  #translation_summary {
+                    display: block;
+                    width: 100% !important;
+                  }
+                  
+                  /* Make the actual table fill the container */
+                  #translation_summary table,
+                  table#translation_summary {
+                    width: 100% !important;
+                    min-width: 100% !important;
+                    table-layout: fixed;
+                  }
+                  
+                  /* Translation summary table */
+                  #translation_summary {
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    background-color: #222;
+                    color: #eeeeee;
+                    font-size: 14px;
+                    margin-top: 15px;
+                  }
+                  
+                  /* Table headings */
+                  #translation_summary th {
+                    background-color: #6f2555;
+                    color: white;
+                    font-weight: 600;
+                    text-align: center;
+                    padding: 14px 12px;
+                    border: none;
+                    letter-spacing: 0.3px;
+                  }
+                  
+                  /* Table cells */
+                  #translation_summary td {
+                    text-align: center;
+                    padding: 12px;
+                    border: none;
+                    border-bottom: 1px solid #444;
+                  }
+                  
+                  /* Alternating row colours */
+                  #translation_summary tbody tr:nth-child(odd) {
+                    background-color: #292929;
+                  }
+                  
+                  #translation_summary tbody tr:nth-child(even) {
+                    background-color: #333333;
+                  }
+                  
+                  /* Hover effect */
+                  #translation_summary tbody tr:hover {
+                    background-color: #492b43;
+                    transition: background-color 0.2s ease;
+                  }
+                  
+                  /* First column - frame names */
+                  text-align: center;
+                  #translation_summary td:first-child {
+                    color: white;
+                    font-weight: 600;
+                  }
+                  
+                  /* Remove final row border */
+                  #translation_summary tbody tr:last-child td {
+                    border-bottom: none;
+                  }
+                  
                 ")),
                 tags$script(HTML("
                 
@@ -145,6 +219,14 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              div(style = "text-align: right;",
                                  actionButton("copy_translation", "Copy to Clipboard")))))
                   ),
+                  # Translation summary
+                  conditionalPanel(
+                    condition = "input.submit_translation > 0",
+                    fluidRow(
+                      column(width = 12,
+                             h3("Translation Summary:"),
+                             tableOutput("translation_summary")))
+                    ),
                   
          
                   ########################
@@ -315,12 +397,15 @@ server <- function(input, output) {
     # Remove line breaks and convert to uppercase
     sequence <- gsub("\\s+", "", sequence)
     sequence <- chartr("U", "T", sequence)
-    
+    nucleotide_length = nchar(sequence)
     
     # Loop through six reading frames
     
     # Initialise all translations
     all_translations <- character()
+    
+    # Initialise all translations
+    all_amino_strings <- character()
     
     # Loop through six reading frames
     for (frame in 1:6) {
@@ -365,18 +450,118 @@ server <- function(input, output) {
       # Combine amino acids into a single string
       translations <- paste(translations, collapse = "")
       
+      #Add them to all translations without header
+      all_amino_strings <- c(all_amino_strings, translations)
+      
       # Add frame header
       translations <- paste0(">Frame_", frame, "\n", translations)
       
       # Store completed translation
       all_translations <- c(all_translations, translations)
+      
     }
     
-    # Combine all six frames
-    translations <- paste(all_translations, collapse = "\n")
-    return(translations)
-  })
+    # Initialise dataframe
+    translation_summary <- data.frame(
+      Frame = paste0("Frame ", 1:6),
+      Nucleotide_Length = rep(nucleotide_length, 6),
+      Translated_Length = NA,
+      Longest_ORF = NA,
+      Stop_Codons = NA,
+      Start_Codons = NA
+    )
+      
+    # Read through each translation
+    for (i in seq_along(all_amino_strings)) {
+      seq_i <- (all_amino_strings[i])
+      
+      ###################
+      #translated length
+      ####################
+      len <- nchar(seq_i)
+      translation_summary$Translated_Length[i] <- len
+      
+      ###############
+      # Longest ORF
+      ###############
+      orf_lengths <- c()
+      
+      # Find all start codons
+      start_positions <- gregexpr("M", seq_i)[[1]]
+      
+      # Find all stop codons
+      stop_positions <- gregexpr("\\*", seq_i)[[1]]
+      
+      # Check that both start and stop codons exist
+      if (start_positions[1] != -1 && stop_positions[1] != -1) {
+        
+        # Check each start codon
+        for (start in start_positions) {
+          
+          # Find stop codons occurring after the start
+          valid_stops <- stop_positions[stop_positions > start]
+          
+          if (length(valid_stops) > 0) {
+            
+            # Get first downstream stop codon
+            stop <- min(valid_stops)
+            
+            # Calculate ORF length (excluding stop codon)
+            orf_lengths <- c(orf_lengths, stop - start)
+          }
+        }
+      }
+      
+      # Store longest ORF
+      longest_orf <- if (length(orf_lengths) > 0) {
+        max(orf_lengths)
+      } else {
+        0
+      }
+      
+      translation_summary$Longest_ORF[i] <- longest_orf
+      
+      ###############################
+      # Count in-frame stop codons
+      ###############################
+      stop_codons <- length(
+        gregexpr("\\*", seq_i)[[1]]
+      )
+      stop_codons <- if (stop_positions[1] == -1) {
+        0
+      } else {
+        length(stop_positions)
+      }
+      
+      translation_summary$Stop_Codons[i] <- stop_codons
+      
+      ######################
+      # Count start codons
+      ######################
+      start_positions <- gregexpr("M", seq_i)[[1]]
+      
+      start_codons <- if (start_positions[1] == -1) {
+        0
+      } else {
+        length(start_positions)
+      }
+      
+      translation_summary$Start_Codons[i] <- start_codons
     
+    }
+    
+    #########################
+    # Combine all six frames
+    #########################
+    translations <- paste(all_translations, collapse = "\n")
+
+    # Return translations and summary dataframe
+    return(list(
+      translations = translations,
+      summary = translation_summary
+    ))
+  })
+  
   # Print text at beginning
   output$txtout2 <- renderUI({
     
@@ -387,9 +572,14 @@ server <- function(input, output) {
       ))
     }
     
-    tags$pre(translation_data())
+    tags$pre(translation_data()$translations)
   })
-    
+  # Display translation summary
+  output$translation_summary <- renderTable({
+    summary <- translation_data()$summary
+    colnames(summary) <- gsub("_", " ", colnames(summary))
+    summary
+  }, digits = 0, align = "c")
   
   
   ########################
