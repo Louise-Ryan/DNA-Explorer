@@ -5,6 +5,10 @@ library(shinythemes)
 # Define UI
 ui <- fluidPage(theme = shinytheme("darkly"),
                 tags$style(HTML("
+                  /* Add padding to bottom of page */
+                  body {
+                    padding-bottom: 60px;
+                  }
                   /* Change navbar banner colour */
                   .navbar {
                     background-color: #6f2555 !important;
@@ -34,46 +38,55 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   #txtout {min-height: 150px; max-height: 300px; overflow-y: auto;}
                 ")),
                 tags$script(HTML("
-                  $(document).on('click', '#copy_sequence', function() {
-                    var output = document.querySelector('#txtout pre');
                 
-                    if (!output) {
-                      alert('Nothing to copy, please submit a sequence!');
-                      return;
-                    }
+                $(document).on('click', '#copy_sequence, #copy_translation', function() {
                 
-                  var sequence = output.textContent
-                    .replace(/\r\n/g, '\n')
-                    .replace(/\n{2,}/g, '\n')
-                    .trim();                
-                    if (navigator.clipboard && window.isSecureContext) {
-                      navigator.clipboard.writeText(sequence)
-                        .then(function() {
-                          alert('Sequence copied to clipboard!');
-                        })
-                        .catch(function() {
-                          copyFallback(sequence);
-                        });
-                    } else {
-                      copyFallback(sequence);
-                    }
+                  // Identify which output to copy
+                  var output_id = this.id === 'copy_sequence' ? '#txtout' : '#txtout2';
+                  var output = document.querySelector(output_id + ' pre');
                 
-                    function copyFallback(text) {
-                      var textarea = document.createElement('textarea');
-                      textarea.value = text;
-                      document.body.appendChild(textarea);
-                      textarea.select();
+                  if (!output) {
+                    alert('Nothing to copy, please submit a sequence!');
+                    return;
+                  }
                 
-                      try {
-                        document.execCommand('copy');
+                  // Extract sequence text
+                  var sequence = output.textContent.trim();
+                
+                  // Copy sequence to clipboard
+                  if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(sequence)
+                      .then(function() {
                         alert('Sequence copied to clipboard!');
-                      } catch (error) {
-                        alert('Unable to copy sequence.');
-                      }
+                      })
+                      .catch(function() {
+                        copyFallback(sequence);
+                      });
+                  } else {
+                    copyFallback(sequence);
+                  }
                 
-                      document.body.removeChild(textarea);
+                  // Fallback clipboard function
+                  function copyFallback(text) {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                
+                    try {
+                      var successful = document.execCommand('copy');
+                      alert(successful ? 'Sequence copied to clipboard!' : 'Unable to copy sequence.');
+                    } catch (error) {
+                      alert('Unable to copy sequence.');
                     }
-                  });
+                
+                    document.body.removeChild(textarea);
+                  }
+                });
+
                 ")),
                 
                 
@@ -93,7 +106,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              "Sequence type:",
                              choices = c("DNA", "RNA"),
                              selected = "DNA",
-                             inline = TRUE, 
+                             inline = TRUE 
                            ),
                            fluidRow(
                              column( width = 12, 
@@ -107,7 +120,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                 h3("Reverse Complement:"),
                                 uiOutput("txtout"),
                                 conditionalPanel(
-                                  condition = "input.submit > 0",
+                                  condition = "input.submit_reverse_comp > 0",
                                   div(style = "text-align: right;",
                                       actionButton("copy_sequence", "Copy to Clipboard")))))
                   ), 
@@ -121,8 +134,18 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     column( width = 12, 
                             tags$h3("Input Sequence:"),
                             textAreaInput("txt2", "Nucleotide sequence:", "", width="100%", rows = 10),
-                            actionButton("submit", "Submit")))
+                            actionButton("submit_translation", "Submit"))
                   ), 
+                  fluidRow(
+                    column(width = 12,
+                           h3("Six Frame Translation:"),
+                           uiOutput("txtout2"),
+                           conditionalPanel(
+                             condition = "input.submit_translation > 0",
+                             div(style = "text-align: right;",
+                                 actionButton("copy_translation", "Copy to Clipboard")))))
+                  ),
+                  
          
                   ########################
                   # 3. Get subsequence
@@ -175,6 +198,7 @@ server <- function(input, output) {
     
     # Get complementary sequence
     if (input$sequence_type == "RNA") {
+      sequence <- chartr("T", "U", sequence)
       complement <- chartr("AUGC", "UACG", sequence)
     } else {
       complement <- chartr("ATGC", "TACG", sequence)
@@ -265,10 +289,107 @@ server <- function(input, output) {
   )
   
   translation_data <- eventReactive(input$submit_translation, {
+    # Get input sequence
+    text <- input$txt2
     
-    # Translation code goes here
+    # Separate FASTA header and sequence if present
+    if (grepl("^>", text)) {
+      header <- sub("[\r\n].*$", "", text)
+      
+      if (grepl("[\r\n]", text)) {
+        sequence <- sub("^[^\r\n]*[\r\n]+", "", text)
+      } else {
+        sequence <- ""
+      }
+      
+    } else {
+      header <- ""
+      sequence <- text
+    }
     
+    # Check whether a sequence was provided
+    if (sequence == "") {
+      return("Please enter a nucleotide sequence")
+    }
+    
+    # Remove line breaks and convert to uppercase
+    sequence <- gsub("\\s+", "", sequence)
+    sequence <- chartr("U", "T", sequence)
+    
+    
+    # Loop through six reading frames
+    
+    # Initialise all translations
+    all_translations <- character()
+    
+    # Loop through six reading frames
+    for (frame in 1:6) {
+      
+      # Initialise translated sequence
+      translations <- character()
+      
+      # Frames 1-3: Original sequence
+      if (frame <= 3) {
+        
+        frame_sequence <- sequence
+        start <- frame
+        
+      } else {
+        # Frames 4-6: Reverse complement sequence
+        complement <- chartr("ATGC", "TACG", sequence)
+        
+        # Get reverse complement
+        reverse_complement <- paste(
+          rev(strsplit(complement, "")[[1]]),
+          collapse = ""
+        )
+        
+        frame_sequence <- reverse_complement
+        start <- frame - 3
+      }
+      
+      # Translate sequence 3 nucleotides at a time
+      if (nchar(frame_sequence) >= start + 2) {
+        for (i in seq(start, nchar(frame_sequence) - 2, by = 3)) {
+          
+          codon <- substring(frame_sequence, i, i + 2)
+          
+          amino_acid <- codon_table$Amino_Acid[
+            codon_table$Codon == codon
+          ]
+          
+          translations <- c(translations, amino_acid)
+        }
+      }
+      
+      # Combine amino acids into a single string
+      translations <- paste(translations, collapse = "")
+      
+      # Add frame header
+      translations <- paste0(">Frame_", frame, "\n", translations)
+      
+      # Store completed translation
+      all_translations <- c(all_translations, translations)
+    }
+    
+    # Combine all six frames
+    translations <- paste(all_translations, collapse = "\n")
+    return(translations)
   })
+    
+  # Print text at beginning
+  output$txtout2 <- renderUI({
+    
+    if (input$submit_translation == 0) {
+      return(tags$pre(
+        style = "font-style: italic;",
+        "Your translated sequences will appear here."
+      ))
+    }
+    
+    tags$pre(translation_data())
+  })
+    
   
   
   ########################
