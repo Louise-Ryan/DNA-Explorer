@@ -175,6 +175,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   #####################################
                   
                   tabPanel("Reverse Complement",
+                           
                            radioButtons(
                              "sequence_type",
                              "Sequence type:",
@@ -182,22 +183,40 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                              selected = "DNA",
                              inline = TRUE 
                            ),
+                           
+                           # Input sequence
                            fluidRow(
-                             column( width = 12, 
-                             tags$h3("Input Sequence:"),
-                             textAreaInput("txt1", "Nucleotide sequence:", "", width="100%", rows = 10),
-                             actionButton("submit_reverse_comp", "Submit"))
+                             column(width = 12, 
+                                    tags$h3("Input Sequence:"),
+                                    textAreaInput("txt1", "Nucleotide sequence:", "", width = "100%", rows = 10),
+                                    actionButton("submit_reverse_comp", "Submit")
+                             )
                            ), 
                            
+                           # Reverse complement output
                            fluidRow(
                              column(width = 12,
-                                h3("Reverse Complement:"),
-                                uiOutput("txtout"),
-                                conditionalPanel(
-                                  condition = "input.submit_reverse_comp > 0",
-                                  div(style = "text-align: right;",
-                                      actionButton("copy_sequence", "Copy to Clipboard")))))
-                  ), 
+                                    
+                                    h3("Reverse Complement:"),
+                                    uiOutput("txtout"),
+                                    
+                                    # Copy to Clipboard button
+                                    conditionalPanel(
+                                      condition = "input.submit_reverse_comp > 0",
+                                      div(
+                                        style = "text-align: right;",
+                                        actionButton("copy_sequence", "Copy to Clipboard"))
+                                    ),
+                                    
+                                    # Reverse complement diagram
+                                    h3("How It Works:", style = "margin-top: 40px;"),
+                                    
+                                    tags$div(
+                                      style = "text-align: left; margin-top: 20px; padding-bottom: 100px;",
+                                      tags$img(
+                                        src = "Reverse-complement.svg",
+                                        style = "width: 90%; height: auto;"))))
+                  ),
                   
                   #########################
                   # 2. Tool 2: Translation 
