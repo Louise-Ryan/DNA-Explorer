@@ -215,7 +215,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                       style = "text-align: left; margin-top: 20px; padding-bottom: 100px;",
                                       tags$img(
                                         src = "Reverse-complement.svg",
-                                        style = "width: 90%; height: auto;"))))
+                                        style = "width: 75%; height: auto;"))))
                   ),
                   
                   #########################
