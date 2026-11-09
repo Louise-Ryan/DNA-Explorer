@@ -474,15 +474,19 @@ server <- function(input, output) {
       sequence <- text
     }
     
-    # Check whether a sequence was provided
-    if (sequence == "") {
-      return("Please enter a nucleotide sequence")
-    }
-    
     # Remove line breaks and convert to uppercase
     sequence <- gsub("\\s+", "", sequence)
     sequence <- chartr("U", "T", sequence)
     nucleotide_length = nchar(sequence)
+    
+    # Check minimum sequence length
+
+    if (nucleotide_length < 6) {
+      return(list(
+        translations = "Please enter a sequence containing at least 6 nucleotides",
+        summary = data.frame()
+      ))
+    }
     
     # Loop through six reading frames
     
