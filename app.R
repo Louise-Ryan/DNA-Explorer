@@ -41,6 +41,9 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   /* Set minimum and maximum output box height and enable scrolling */
                   #txtout {min-height: 150px; max-height: 300px; overflow-y: auto;}
                   
+                   /* Set minimum and maximum output box height and enable scrolling txt3 */
+                  #txtout3 {min-height: 150px; max-height: 300px; overflow-y: auto;}
+                  
                   
                   /* Reverse complement output box */
                   #txtout {
@@ -133,10 +136,13 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 ")),
                 tags$script(HTML("
                 
-                $(document).on('click', '#copy_sequence, #copy_translation', function() {
+                $(document).on('click', '#copy_sequence, #copy_translation, #copy_bulk_translation', function() {
                 
                   // Identify which output to copy
-                  var output_id = this.id === 'copy_sequence' ? '#txtout' : '#txtout2';
+                  var output_id = this.id === 'copy_sequence' ? '#txtout' :
+                                  this.id === 'copy_translation' ? '#txtout2' :
+                                  this.id === 'copy_bulk_translation' ? '#txtout3' : '';
+                  
                   var output = document.querySelector(output_id + ' pre');
                 
                   if (!output) {
@@ -288,7 +294,14 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                            fluidRow(
                              column( width = 12, 
                                      tags$h3("Input Sequence:"),
-                                     textAreaInput("txt3", "Please enter your nucleotide dataset. Sequences must be in fasta format (i.e fasta header is required). Multiple sequences accepted.", "", width="100%", rows = 10),
+                                     textAreaInput(
+                                       "txt3",
+                                       tags$label("Please enter your nucleotide dataset. Sequences must be in fasta format (i.e fasta header is required). Multiple sequences accepted.",
+                                                  style = "font-weight: normal;"),
+                                       "",
+                                       width = "100%",
+                                       rows = 10
+                                     ),
                                      actionButton("submit_bulk_translation", "Submit"))
                            ), 
                            fluidRow(
@@ -298,10 +311,10 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                     conditionalPanel(
                                       condition = "input.submit_bulk_translation > 0",
                                       div(style = "text-align: right;",
-                                          actionButton("copy_translation", "Copy to Clipboard")))))
+                                          actionButton("copy_bulk_translation", "Copy to Clipboard")))))
                   ),                  
                   
-                  
+       
                   
                   
                   tabPanel("Get Subsequence", "This feature will be built soon"),
@@ -316,6 +329,44 @@ ui <- fluidPage(theme = shinytheme("darkly"),
 
 # Define server function
 server <- function(input, output) {
+  codon_table <- data.frame(
+    Codon = c(
+      "TTT", "TTC", "TTA", "TTG",
+      "TCT", "TCC", "TCA", "TCG",
+      "TAT", "TAC", "TAA", "TAG",
+      "TGT", "TGC", "TGA", "TGG",
+      "CTT", "CTC", "CTA", "CTG",
+      "CCT", "CCC", "CCA", "CCG",
+      "CAT", "CAC", "CAA", "CAG",
+      "CGT", "CGC", "CGA", "CGG",
+      "ATT", "ATC", "ATA", "ATG",
+      "ACT", "ACC", "ACA", "ACG",
+      "AAT", "AAC", "AAA", "AAG",
+      "AGT", "AGC", "AGA", "AGG",
+      "GTT", "GTC", "GTA", "GTG",
+      "GCT", "GCC", "GCA", "GCG",
+      "GAT", "GAC", "GAA", "GAG",
+      "GGT", "GGC", "GGA", "GGG"
+    ),
+    Amino_Acid = c(
+      "F", "F", "L", "L",
+      "S", "S", "S", "S",
+      "Y", "Y", "*", "*",
+      "C", "C", "*", "W",
+      "L", "L", "L", "L",
+      "P", "P", "P", "P",
+      "H", "H", "Q", "Q",
+      "R", "R", "R", "R",
+      "I", "I", "I", "M",
+      "T", "T", "T", "T",
+      "N", "N", "K", "K",
+      "S", "S", "R", "R",
+      "V", "V", "V", "V",
+      "A", "A", "A", "A",
+      "D", "D", "E", "E",
+      "G", "G", "G", "G"
+    )
+  )
   
   #####################################
   # 1. Tool 1: Get reverse complement
@@ -403,45 +454,6 @@ server <- function(input, output) {
   #########################
   # 2. Tool 2: Translation
   #########################
-  
-  codon_table <- data.frame(
-    Codon = c(
-      "TTT", "TTC", "TTA", "TTG",
-      "TCT", "TCC", "TCA", "TCG",
-      "TAT", "TAC", "TAA", "TAG",
-      "TGT", "TGC", "TGA", "TGG",
-      "CTT", "CTC", "CTA", "CTG",
-      "CCT", "CCC", "CCA", "CCG",
-      "CAT", "CAC", "CAA", "CAG",
-      "CGT", "CGC", "CGA", "CGG",
-      "ATT", "ATC", "ATA", "ATG",
-      "ACT", "ACC", "ACA", "ACG",
-      "AAT", "AAC", "AAA", "AAG",
-      "AGT", "AGC", "AGA", "AGG",
-      "GTT", "GTC", "GTA", "GTG",
-      "GCT", "GCC", "GCA", "GCG",
-      "GAT", "GAC", "GAA", "GAG",
-      "GGT", "GGC", "GGA", "GGG"
-    ),
-    Amino_Acid = c(
-      "F", "F", "L", "L",
-      "S", "S", "S", "S",
-      "Y", "Y", "*", "*",
-      "C", "C", "*", "W",
-      "L", "L", "L", "L",
-      "P", "P", "P", "P",
-      "H", "H", "Q", "Q",
-      "R", "R", "R", "R",
-      "I", "I", "I", "M",
-      "T", "T", "T", "T",
-      "N", "N", "K", "K",
-      "S", "S", "R", "R",
-      "V", "V", "V", "V",
-      "A", "A", "A", "A",
-      "D", "D", "E", "E",
-      "G", "G", "G", "G"
-    )
-  )
   
   translation_data <- eventReactive(input$submit_translation, {
     # Get input sequence
@@ -669,14 +681,149 @@ server <- function(input, output) {
   
   
   ########################
-  # 3. Get subsequence
+  # 3. Get Bulk translation
   ########################
   
-  subsequence_data <- eventReactive(input$submit_subsequence, {
+  
+  ########################
+  # 3. Get Bulk Translation
+  ########################
+  
+  bulk_translation_data <- eventReactive(input$submit_bulk_translation, {
     
-    # Subsequence code goes here
+    # Get input FASTA text
+    text <- input$txt3
+    
+    # Split input into individual lines
+    lines <- strsplit(text, "\n")[[1]]
+    lines <- trimws(lines)
+    
+    # Remove empty lines
+    lines <- lines[lines != ""]
+    
+    # Identify FASTA headers
+    header_positions <- which(grepl("^>", lines))
+    
+    # Check that FASTA headers are present
+    if (length(header_positions) == 0) {
+      return("Please enter sequences in FASTA format")
+    }
+    
+    # Initialise list to store sequences
+    fasta_sequences <- list()
+    
+    # Extract each sequence
+    for (i in seq_along(header_positions)) {
+      
+      # Get header
+      header <- lines[header_positions[i]]
+      
+      # Determine sequence boundaries
+      start <- header_positions[i] + 1
+      
+      if (i < length(header_positions)) {
+        end <- header_positions[i + 1] - 1
+      } else {
+        end <- length(lines)
+      }
+      
+      # Combine sequence lines
+      sequence <- paste(lines[start:end], collapse = "")
+      
+      # Remove whitespace and convert to uppercase
+      sequence <- toupper(gsub("\\s+", "", sequence))
+      
+      # Convert RNA to DNA
+      sequence <- chartr("U", "T", sequence)
+      
+      # Store header and sequence
+      fasta_sequences[[i]] <- list(
+        header = header,
+        sequence = sequence
+      )
+    }
+    
+    # Initialise translated sequences
+    all_translations <- character()
+    
+    # Translate each sequence
+    for (i in seq_along(fasta_sequences)) {
+      
+      # Extract nucleotide sequence
+      sequence <- fasta_sequences[[i]]$sequence
+      
+      # Check sequence is not empty
+      if (sequence == "") {
+        next
+      }
+      
+      # Initialise translation
+      translations <- character()
+      
+      # Translate sequence three nucleotides at a time
+      if (nchar(sequence) >= 3) {
+        
+        for (j in seq(1, nchar(sequence) - 2, by = 3)) {
+          
+          # Extract codon
+          codon <- substring(sequence, j, j + 2)
+          
+          # Look up amino acid
+          amino_acid <- codon_table$Amino_Acid[
+            codon_table$Codon == codon
+          ]
+          
+          # Handle unrecognised codons
+          if (length(amino_acid) == 0) {
+            amino_acid <- "X"
+          }
+          
+          translations <- c(translations, amino_acid)
+        }
+      }
+      
+      # Combine amino acids
+      translations <- paste(translations, collapse = "")
+      
+      # Wrap translated sequence into lines of 80 characters
+      wrapped_translation <- if (nchar(translations) > 0) {
+        vapply(
+          seq(1, nchar(translations), by = 80),
+          function(x) substr(translations, x, x + 79),
+          character(1)
+        )
+      } else {
+        character()
+      }
+      
+      # Add translated sequence with original header
+      all_translations <- c(
+        all_translations,
+        fasta_sequences[[i]]$header,
+        wrapped_translation
+      )
+    }
+    
+    # Return translated sequences in FASTA format
+    paste(all_translations, collapse = "\n")
     
   })
+  
+  # Display bulk translations
+  output$txtout3 <- renderUI({
+    
+    if (input$submit_bulk_translation == 0) {
+      return(tags$pre(
+        style = "font-style: italic;",
+        "Your translated sequences will appear here."
+      ))
+    }
+    
+    tags$pre(bulk_translation_data())
+    
+  })
+  
+    # Subsequence code goes here
   
 }
 
