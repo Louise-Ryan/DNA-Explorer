@@ -681,12 +681,7 @@ server <- function(input, output) {
   
   
   ########################
-  # 3. Get Bulk translation
-  ########################
-  
-  
-  ########################
-  # 3. Get Bulk Translation
+  # 3. Bulk Translation
   ########################
   
   bulk_translation_data <- eventReactive(input$submit_bulk_translation, {
@@ -707,6 +702,13 @@ server <- function(input, output) {
     # Check that FASTA headers are present
     if (length(header_positions) == 0) {
       return("Please enter sequences in FASTA format")
+    }
+    # Check that FASTA headers are present
+    if (length(header_positions) == 0) {
+      return(tags$p(
+        "Please enter sequences in FASTA format",
+        style = "color: red; font-weight: bold;"
+      ))
     }
     
     # Initialise list to store sequences
