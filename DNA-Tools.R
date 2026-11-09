@@ -30,12 +30,26 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   }
                   /* Increase DNA/RNA radio button text size */
                   .shiny-options-group {font-size: 18px;}
-                
-                  /* Increase Sequence Type heading size */
-                  .shiny-input-radiogroup > label {font-size: 22px;}
+
                 
                   /* Set minimum and maximum output box height and enable scrolling */
                   #txtout {min-height: 150px; max-height: 300px; overflow-y: auto;}
+                  
+                  
+                  /* Reverse complement output box */
+                  #txtout {
+                    display: block;
+                    height: auto;
+                    min-height: 0;
+                    margin-bottom: 20px;
+                  }
+                  
+                  #txtout pre {
+                    display: block;
+                    margin-bottom: 0;
+                    white-space: pre-wrap;
+                    overflow-wrap: break-word;
+                  }
                   
                   /* Make translation summary container full width */
                   #translation_summary {
@@ -175,20 +189,31 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   #####################################
                   
                   tabPanel("Reverse Complement",
-                           
+                           tags$h3("Sequence type:"),
                            radioButtons(
                              "sequence_type",
-                             "Sequence type:",
+                             label = tags$label(
+                               "Please select your sequence type. If you select RNA, uracil (U) will be used instead of thymine (T) and paired with adenine (A).",
+                               style = "font-weight: normal;"
+                             ),
                              choices = c("DNA", "RNA"),
                              selected = "DNA",
                              inline = TRUE 
                            ),
                            
+
                            # Input sequence
                            fluidRow(
                              column(width = 12, 
                                     tags$h3("Input Sequence:"),
-                                    textAreaInput("txt1", "Nucleotide sequence:", "", width = "100%", rows = 10),
+                                    textAreaInput(
+                                      "txt1",
+                                      tags$label("Please enter your nucleotide sequence in the text box below. Fasta headers are accepted. Please enter one sequence at a time.",
+                                                 style = "font-weight: normal;"),
+                                      "",
+                                      width = "100%",
+                                      rows = 10
+                                    ),
                                     actionButton("submit_reverse_comp", "Submit")
                              )
                            ), 
@@ -209,13 +234,14 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                     ),
                                     
                                     # Reverse complement diagram
-                                    h3("How It Works:", style = "margin-top: 40px;"),
+                                    condition = "input.submit_reverse_comp > 0",
+                                    h3("How It Works:", style = "margin-top: 60px;padding-bottom: 20px"),
                                     
                                     tags$div(
                                       style = "text-align: left; margin-top: 20px; padding-bottom: 100px;",
                                       tags$img(
                                         src = "Reverse-complement.svg",
-                                        style = "width: 75%; height: auto;"))))
+                                        style = "width: 60%; height: auto;"))))
                   ),
                   
                   #########################
@@ -252,9 +278,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   ########################
                   # 3. Get subsequence
                   ########################
-                  
-                  tabPanel("Get Subsequence", "This feature will be built soon")
-                  
+                  tabPanel("Bulk Translation", "This feature will be built soon"),
+                  tabPanel("Get Subsequence", "This feature will be built soon"),
+                  tabPanel("Summarise dataset", "This feature will be built soon"),
+                  tabPanel("Pairise comparisson", "This feature will be built soon"),
+  
                 ) # navbarPage
 ) # fluidPage
 
