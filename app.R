@@ -278,7 +278,26 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   ########################
                   # 3. Get subsequence
                   ########################
-                  tabPanel("Bulk Translation", "This feature will be built soon"),
+                  tabPanel("Bulk Translation",
+                           fluidRow(
+                             column( width = 12, 
+                                     tags$h3("Input Sequence:"),
+                                     textAreaInput("txt3", "Please enter your nucleotide dataset. Sequences must be in fasta format (i.e fasta header is required). Multiple sequences accepted.", "", width="100%", rows = 10),
+                                     actionButton("submit_bulk_translation", "Submit"))
+                           ), 
+                           fluidRow(
+                             column(width = 12,
+                                    h3("Translated Sequences:"),
+                                    uiOutput("txtout3"),
+                                    conditionalPanel(
+                                      condition = "input.submit_bulk_translation > 0",
+                                      div(style = "text-align: right;",
+                                          actionButton("copy_translation", "Copy to Clipboard")))))
+                  ),                  
+                  
+                  
+                  
+                  
                   tabPanel("Get Subsequence", "This feature will be built soon"),
                   tabPanel("Summarise dataset", "This feature will be built soon"),
                   tabPanel("Pairise comparisson", "This feature will be built soon"),
