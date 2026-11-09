@@ -4,6 +4,12 @@ library(shinythemes)
 
 # Define UI
 ui <- fluidPage(theme = shinytheme("darkly"),
+                tags$head(
+                  tags$meta(
+                    name = "viewport",
+                    content = "width=device-width, initial-scale=1"
+                  )
+                ),
                 tags$style(HTML("
                   /* Add padding to bottom of page */
                   body {
@@ -276,7 +282,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   
          
                   ########################
-                  # 3. Get subsequence
+                  # 3. Bulk translation
                   ########################
                   tabPanel("Bulk Translation",
                            fluidRow(
