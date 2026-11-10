@@ -2,7 +2,8 @@
 library(shiny)
 library(shinythemes)
 #library(dplyr)
-#library(Biostrings)
+library(Biostrings)
+library(DT)
 
 # Define UI
 ui <- fluidPage(theme = shinytheme("darkly"),
@@ -62,78 +63,91 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     overflow-wrap: break-word;
                   }
                   
-                  /* Make translation summary container full width */
-                  #translation_summary {
-                    display: block;
-                    width: 100% !important;
-                  }
-                  
-                  /* Make the actual table fill the container */
-                  #translation_summary table,
-                  table#translation_summary {
-                    width: 100% !important;
-                    min-width: 100% !important;
-                    table-layout: fixed;
-                  }
-                  
-                  /* Translation summary table */
-                  #translation_summary {
-                    width: 100%;
-                    border-collapse: separate;
-                    border-spacing: 0;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    background-color: #222;
-                    color: #eeeeee;
-                    font-size: 14px;
-                    margin-top: 15px;
-                  }
-                  
-                  /* Table headings */
-                  #translation_summary th {
-                    background-color: #6f2555;
-                    color: white;
-                    font-weight: 600;
-                    text-align: center;
-                    padding: 14px 12px;
-                    border: none;
-                    letter-spacing: 0.3px;
-                  }
-                  
-                  /* Table cells */
-                  #translation_summary td {
-                    text-align: center;
-                    padding: 12px;
-                    border: none;
-                    border-bottom: 1px solid #444;
-                  }
-                  
-                  /* Alternating row colours */
-                  #translation_summary tbody tr:nth-child(odd) {
-                    background-color: #292929;
-                  }
-                  
-                  #translation_summary tbody tr:nth-child(even) {
-                    background-color: #333333;
-                  }
-                  
-                  /* Hover effect */
-                  #translation_summary tbody tr:hover {
-                    background-color: #492b43;
-                    transition: background-color 0.2s ease;
-                  }
-                  
-                  /* First column - frame names */
+                 /* Make translation summary containers full width */
+                #translation_summary,
+                #bulk_translation_summary {
+                  display: block;
+                  width: 100% !important;
+                }
+                
+                /* Make the actual tables fill their containers */
+                #translation_summary table,
+                #bulk_translation_summary table,
+                table#translation_summary,
+                table#bulk_translation_summary {
+                  width: 100% !important;
+                  min-width: 100% !important;
+                  table-layout: fixed;
+                }
+                
+                /* Translation summary tables */
+                #translation_summary,
+                #bulk_translation_summary {
+                  width: 100%;
+                  border-collapse: separate;
+                  border-spacing: 0;
+                  border-radius: 8px;
+                  overflow: hidden;
+                  background-color: #222;
+                  color: #eeeeee;
+                  font-size: 14px;
+                  margin-top: 15px;
+                }
+                
+                /* Table headings */
+                #translation_summary th,
+                #bulk_translation_summary th {
+                  background-color: #6f2555;
+                  color: white;
+                  font-weight: 600;
                   text-align: center;
-                  #translation_summary td:first-child {
-                    color: white;
-                    font-weight: 600;
-                  }
-                  
-                  /* Remove final row border */
-                  #translation_summary tbody tr:last-child td {
-                    border-bottom: none;
-                  }
+                  padding: 14px 12px;
+                  border: none;
+                  letter-spacing: 0.3px;
+                }
+                
+                /* Table cells */
+                #translation_summary td,
+                #bulk_translation_summary td {
+                  text-align: center;
+                  padding: 12px;
+                  border: none;
+                  border-bottom: 1px solid #444;
+                }
+                
+                /* Alternating row colours */
+                #translation_summary tbody tr:nth-child(odd),
+                #bulk_translation_summary tbody tr:nth-child(odd) {
+                  background-color: #292929;
+                }
+                
+                #translation_summary tbody tr:nth-child(even),
+                #bulk_translation_summary tbody tr:nth-child(even) {
+                  background-color: #333333;
+                }
+                
+                /* Hover effect */
+                #translation_summary tbody tr:hover,
+                #bulk_translation_summary tbody tr:hover {
+                  background-color: #492b43;
+                  transition: background-color 0.2s ease;
+                }
+                
+                /* First column - frame names */
+                #translation_summary td:first-child,
+                #bulk_translation_summary td:first-child {
+                  color: white;
+                  font-weight: 600;
+                  text-align: center;
+                }
+                
+           
+                
+                /* Remove final row border */
+                #translation_summary tbody tr:last-child td,
+                #bulk_translation_summary tbody tr:last-child td {
+                  border-bottom: none;
+                }
                   
                 ")),
                 tags$script(HTML("
@@ -266,7 +280,18 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   fluidRow(
                     column( width = 12, 
                             tags$h3("Input Sequence:"),
-                            textAreaInput("txt2", "Nucleotide sequence:", "", width="100%", rows = 10),
+                            textAreaInput(
+                              "txt2",
+                              tags$label(
+                                "Please enter your nucleotide sequence in the text box below. FASTA headers are accepted but subsequently removed.",
+                                tags$br(),
+                                "Please enter one sequence at a time. RNA sequences will be converted to DNA (U → T).",
+                                style = "font-weight: normal;"
+                              ),
+                              "",
+                              width = "100%",
+                              rows = 10
+                            ),
                             actionButton("submit_translation", "Submit"))
                   ), 
                   # Translation summary
@@ -306,6 +331,15 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                      ),
                                      actionButton("submit_bulk_translation", "Submit"))
                            ), 
+                           # Translation summary
+                           conditionalPanel(
+                             condition = "input.submit_bulk_translation > 0",
+                             fluidRow(
+                               column(width = 12,
+                                      h3("Translation Summary:"),
+                                      DTOutput("bulk_translation_summary")))
+                                      #tableOutput("bulk_translation_summary")))
+                           ),
                            fluidRow(
                              column(width = 12,
                                     h3("Translated Sequences:"),
@@ -370,17 +404,18 @@ server <- function(input, output) {
     )
   )
   
+  
   #####################################
   # 1. Tool 1: Get reverse complement
   #####################################
   
-  # Run calculation only when Submit is clicked
+  # Run only when Submit is clicked
   sequence_data <- eventReactive(input$submit_reverse_comp, {
     
     # Get input sequence
     text <- input$txt1
     
-    # Separate FASTA header and sequence if present
+    # Strip header if present
     if (grepl("^>", text)) {
       header <- sub("[\r\n].*$", "", text)
       
@@ -395,47 +430,72 @@ server <- function(input, output) {
       sequence <- text
     }
     
+    # Remove line breaks and convert to uppercase
+    sequence <- gsub("\\s+", "", sequence)
+    sequence <- toupper(sequence)
+    
     # Check whether a sequence was provided
     if (sequence == "") {
       return("Please enter a nucleotide sequence")
     }
     
-    # Remove line breaks and convert to uppercase
-    sequence <- gsub("\\s+", "", sequence)
-    sequence <- toupper(sequence)
-    
-    # Get complementary sequence
-    if (input$sequence_type == "RNA") {
-      sequence <- chartr("T", "U", sequence)
-      complement <- chartr("AUGC", "UACG", sequence)
+    # Define valid nucleotide characters
+    valid_chars <- if (input$sequence_type == "DNA") {
+      "ACGTRYSWKMBDHVN"
     } else {
-      complement <- chartr("ATGC", "TACG", sequence)
+      "ACGURYSWKMBDHVN"
     }
     
-    # Get reverse complement
-    reverse_complement <- rev(strsplit(complement, "")[[1]])
+    # Check for invalid characters
+    if (!grepl(paste0("^[", valid_chars, "]+$"), sequence)) {
+      return("Invalid nucleotide sequence. Please use valid IUPAC nucleotide codes.")
+    }
     
-    # Wrap sequence at 80 chars
-    sequence_string <- paste(reverse_complement, collapse = "")
-    sequence_length <- nchar(sequence_string)
+    # Check for incorrect nucleotide type
+    else if (input$sequence_type == "DNA" && grepl("U", sequence)) {
+      return("Invalid DNA sequence. Did you mean to select RNA?")
+    }
     
-    starts <- seq(1, sequence_length, by = 80)
-    ends <- pmin(starts + 79, sequence_length)
+    else if (input$sequence_type == "RNA" && grepl("T", sequence)) {
+      return("Invalid RNA sequence. Did you mean to select DNA?")
+    }
     
-    reverse_complement <- paste(
-      substring(sequence_string, starts, ends),
-      collapse = "\n"
-    )
-    
-    # Check sequence lengths
-    print(paste("Original sequence:", nchar(sequence)))
-    print(paste("Reverse complement:", sum(nchar(strsplit(reverse_complement, "\n")[[1]]))))
-    
-    # Print header and reverse complement
-    if (header != "") {
-      paste(header, reverse_complement, sep = "\n")
-    } else {
-      reverse_complement
+    else {
+      
+      # Convert to Biostrings object
+      if (input$sequence_type == "RNA") {
+        sequence <- RNAString(sequence)
+      } else {
+        sequence <- DNAString(sequence)
+      }
+      
+      # Get reverse complement
+      reverse_complement <- reverseComplement(sequence)
+      
+      # Convert to character string
+      sequence_string <- as.character(reverse_complement)
+      
+      # Wrap sequence at 80 chars
+      sequence_length <- nchar(sequence_string)
+      
+      starts <- seq(1, sequence_length, by = 80)
+      ends <- pmin(starts + 79, sequence_length)
+      
+      reverse_complement <- paste(
+        substring(sequence_string, starts, ends),
+        collapse = "\n"
+      )
+      
+      # Check sequence lengths
+      print(paste("Original sequence:", length(sequence)))
+      print(paste("Reverse complement:", nchar(gsub("\\n", "", reverse_complement))))
+      
+      # Print header and reverse complement
+      if (header != "") {
+        paste(header, reverse_complement, sep = "\n")
+      } else {
+        reverse_complement
+      }
     }
   })
   
@@ -453,11 +513,13 @@ server <- function(input, output) {
   })
   
   
+  
   #########################
   # 2. Tool 2: Translation
   #########################
   
   translation_data <- eventReactive(input$submit_translation, {
+  
     # Get input sequence
     text <- input$txt2
     
@@ -482,9 +544,27 @@ server <- function(input, output) {
     sequence <-toupper(sequence)
     nucleotide_length = nchar(sequence)
     
+    
+    # Define valid nucleotide characters
+    valid_chars <- "ACGTRYSWYKMBDHVN"
+ 
+    if (length(gregexpr(">", text, fixed = TRUE)[[1]]) > 1) {
+      return(list(
+        translations = "More than one sequence dectected. \nPlease enter one sequence at a time, or check your sequence for misplaced '>' characters.",
+        summary = data.frame()
+      ))
+    }
+    
+    # Check for invalid characters
+    else if (!grepl(paste0("^[", valid_chars, "]+$"), sequence)) {
+      return(list(
+        translations = "Invalid nucleotide sequence. Please use valid IUPAC nucleotide codes",
+        summary = data.frame()
+      ))
+    }
+    
     # Check minimum sequence length
-
-    if (nucleotide_length < 6) {
+    else if (nucleotide_length < 6) {
       return(list(
         translations = "Please enter a sequence containing at least 6 nucleotides",
         summary = data.frame()
@@ -544,9 +624,6 @@ server <- function(input, output) {
       
       #Add them to all translations without header
       all_amino_strings <- c(all_amino_strings, translations)
-      
-      # Add frame header
-      #translations <- paste0(">Frame_", frame, "\n", translations)
       
       # Split translation into lines of 80 characters
       wrapped_translation <- vapply(
@@ -755,50 +832,103 @@ server <- function(input, output) {
     # Initialise translated sequences
     all_translations <- character()
     
-    # Translate each sequence
-    for (i in seq_along(fasta_sequences)) {
+    
+    # Extract nucleotide sequences
+    sequences <- vapply(
+      fasta_sequences,
+      function(x) x$sequence,
+      character(1)
+    )
+    
+    # Extract FASTA headers
+    headers <- vapply(
+      fasta_sequences,
+      function(x) x$header,
+      character(1)
+    )
+    
+    # Remove empty sequences
+    valid_sequences <- sequences != ""
+    sequences <- sequences[valid_sequences]
+    headers <- headers[valid_sequences]
+    
+    
+    # Remove empty sequences
+    valid_sequences <- sequences != ""
+    sequences <- sequences[valid_sequences]
+    headers <- headers[valid_sequences]
+    
+    # Convert RNA to DNA
+    sequences <- chartr("U", "T", sequences)
+    
+    # Check for invalid characters
+    valid_chars <- "ACGTRYSWKMBDHVN"
+    
+    if (any(!grepl(paste0("^[", valid_chars, "]+$"), sequences))) {
+      return(list(
+        translations = "Invalid nucleotide sequence detected in dataset.\nPlease use valid IUPAC nucleotide codes only.\nAmbiguous character or gaps can be denoted by 'N",
+        summary = data.frame()
+      ))
+    }
+    
+    # Create DNAStringSet
+    dna_sequences <- DNAStringSet(sequences)
+    
+    # Retain FASTA headers
+    names(dna_sequences) <- headers
+    
+    # Translate sequences
+    translations <- translate(
+      dna_sequences,
+      if.fuzzy.codon = "X"
+    )
+    
+    # Initialise and populate summary dataframe
+    bulk_translation_summary <- data.frame(
+      Sequence = paste0("Seq_", seq_along(dna_sequences)),
+      Nucleotide_Length = width(dna_sequences),
+      Amino_Acid_Length = width(translations),
+      Begins_With_Start = width(dna_sequences) >= 3 &
+        as.character(subseq(dna_sequences, start = 1, width = 3)) == "ATG",
+      Ends_With_Stop = vapply(
+        as.character(translations),
+        function(x) endsWith(x, "*"),
+        logical(1)
+      ),
+      In_Frame_Stop_Codons = NA_integer_
+    )
+    
+    # Count internal stop codons
+    for (i in seq_along(translations)) {
       
-      # Extract nucleotide sequence
-      sequence <- fasta_sequences[[i]]$sequence
+      # Extract translated sequence
+      amino_acids <- as.character(translations[[i]])
       
-      # Check sequence is not empty
-      if (sequence == "") {
-        next
+      # Count all stop codons
+      stop_count <- sum(strsplit(amino_acids, "")[[1]] == "*")
+      
+      # Exclude terminal stop codon if present
+      if (endsWith(amino_acids, "*")) {
+        stop_count <- stop_count - 1
       }
       
-      # Initialise translation
-      translations <- character()
+      bulk_translation_summary$In_Frame_Stop_Codons[i] <- stop_count
+    }
+    
+    # Initialise translated sequences
+    all_translations <- character()
+    
+    # Format translated sequences
+    for (i in seq_along(translations)) {
       
-      # Translate sequence three nucleotides at a time
-      if (nchar(sequence) >= 3) {
-        
-        for (j in seq(1, nchar(sequence) - 2, by = 3)) {
-          
-          # Extract codon
-          codon <- substring(sequence, j, j + 2)
-          
-          # Look up amino acid
-          amino_acid <- codon_table$Amino_Acid[
-            codon_table$Codon == codon
-          ]
-          
-          # Handle unrecognised codons
-          if (length(amino_acid) == 0) {
-            amino_acid <- "X"
-          }
-          
-          translations <- c(translations, amino_acid)
-        }
-      }
-      
-      # Combine amino acids
-      translations <- paste(translations, collapse = "")
+      # Convert amino acid sequence to character
+      amino_acids <- as.character(translations[[i]])
       
       # Wrap translated sequence into lines of 80 characters
-      wrapped_translation <- if (nchar(translations) > 0) {
+      wrapped_translation <- if (nchar(amino_acids) > 0) {
         vapply(
-          seq(1, nchar(translations), by = 80),
-          function(x) substr(translations, x, x + 79),
+          seq(1, nchar(amino_acids), by = 80),
+          function(x) substr(amino_acids, x, x + 79),
           character(1)
         )
       } else {
@@ -808,16 +938,19 @@ server <- function(input, output) {
       # Add translated sequence with original header
       all_translations <- c(
         all_translations,
-        fasta_sequences[[i]]$header,
+        names(translations)[i],
         wrapped_translation
       )
     }
     
     # Return translated sequences in FASTA format
-    paste(all_translations, collapse = "\n")
-    
+    # Return translated sequences and summary
+    list(
+      translations = paste(all_translations, collapse = "\n"),
+      summary = bulk_translation_summary
+    )
   })
-  
+    
   # Display bulk translations
   output$txtout3 <- renderUI({
     
@@ -828,11 +961,50 @@ server <- function(input, output) {
       ))
     }
     
-    tags$pre(bulk_translation_data())
+    result <- bulk_translation_data()
     
+    if (!is.null(result$error)) {
+      return(tags$p(
+        result$error,
+        style = "color: red; font-weight: bold;"
+      ))
+    }
+    
+    tags$pre(result$translations)
   })
+  # Display translation summary
+  output$bulk_translation_summary <- renderDT({
+    
+    summary <- bulk_translation_data()$summary
+    colnames(summary) <- gsub("_", " ", colnames(summary))
+    
+    datatable(
+      summary,
+      filter = "none",
+      options = list(
+        pageLength = 10,
+        scrollY = "550px",
+        scrollCollapse = TRUE,
+        columnDefs = list(
+          list(className = "dt-center", targets = "_all")
+        )
+      ),
+      rownames = FALSE
+    ) %>%
+      formatRound(
+        columns = c("Nucleotide Length", "Amino Acid Length", "In Frame Stop Codons"),
+        digits = 0
+      )
+  })
+  # Display translation summary
+  #output$bulk_translation_summary <- renderTable({
+  #  summary <- bulk_translation_data()$summary
+  #  colnames(summary) <- gsub("_", " ", colnames(summary))
+  #  summary
+  #}, digits = 0, align = "c")
   
-    # Subsequence code goes here
+  
+  # Subsequence code goes here
   
 }
 
