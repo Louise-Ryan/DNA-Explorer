@@ -1,6 +1,8 @@
 # Load R packages
 library(shiny)
 library(shinythemes)
+library(dplyr)
+#library(Biostrings)
 
 # Define UI
 ui <- fluidPage(theme = shinytheme("darkly"),
@@ -477,6 +479,7 @@ server <- function(input, output) {
     # Remove line breaks and convert to uppercase
     sequence <- gsub("\\s+", "", sequence)
     sequence <- chartr("U", "T", sequence)
+    sequence <-toupper(sequence)
     nucleotide_length = nchar(sequence)
     
     # Check minimum sequence length
