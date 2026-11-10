@@ -1,7 +1,7 @@
 # Load R packages
 library(shiny)
 library(shinythemes)
-library(dplyr)
+#library(dplyr)
 #library(Biostrings)
 
 # Define UI
