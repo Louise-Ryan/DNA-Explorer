@@ -888,9 +888,9 @@ server <- function(input, output) {
       Sequence = paste0("Seq_", seq_along(dna_sequences)),
       Nucleotide_Length = width(dna_sequences),
       Amino_Acid_Length = width(translations),
-      Begins_With_Start = width(dna_sequences) >= 3 &
+      Begins_With_Start_Codon = width(dna_sequences) >= 3 &
         as.character(subseq(dna_sequences, start = 1, width = 3)) == "ATG",
-      Ends_With_Stop = vapply(
+      Ends_With_Stop_Codon = vapply(
         as.character(translations),
         function(x) endsWith(x, "*"),
         logical(1)
