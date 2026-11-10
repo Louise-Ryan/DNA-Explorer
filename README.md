@@ -1,5 +1,10 @@
-# DNA-Tools
-An accessible web-based tool for exploring and analysing genetic sequence data.
+<p align="left">
+
+<img src = "www/dna-tools-logo.svg" max-width=100%>
+
+<hr>
+
+**DNA-Tools is an accessible web-based tool for exploring and analysing genetic sequence data.**
 
 **Project currently in development, check back for updates!**
 
