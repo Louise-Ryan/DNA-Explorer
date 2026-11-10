@@ -350,12 +350,9 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                           actionButton("copy_bulk_translation", "Copy to Clipboard")))))
                   ),                  
                   
-       
-                  
-                  
-                  tabPanel("Get Subsequence", "This feature will be built soon"),
                   tabPanel("Summarise dataset", "This feature will be built soon"),
-                  tabPanel("Pairise comparisson", "This feature will be built soon"),
+                  tabPanel("Pairwise comparissons", "This feature will be built soon"),
+                  tabPanel("Get Subsequence", "This feature will be built soon"),
   
                 ) # navbarPage
 ) # fluidPage
