@@ -1621,13 +1621,10 @@
   },
   "files": {
     "app.R": {
-      "checksum": "bf4b31ff5cd1c3bcebc796837f0e8312"
+      "checksum": "520505df378a6d7796b0460177535bac"
     },
     "README.md": {
       "checksum": "95b6396f499a91458a4c474e0823aaeb"
-    },
-    "update-json.sh": {
-      "checksum": "16905bdd14b78d39673d67f6c6eb1483"
     },
     "www/Reverse-complement.svg": {
       "checksum": "d4fbfb12b2ec7088cc3939169c1fa98f"
