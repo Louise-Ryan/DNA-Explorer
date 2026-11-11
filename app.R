@@ -307,6 +307,42 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   resize: vertical;
                   margin-bottom: 15px;
                 } 
+                /* Overall navbar height */
+                .navbar {
+                  min-height: 65px !important;
+                }
+                
+                /* Brand (logo + DNA Tools) */
+                .navbar-header .navbar-brand {
+                  height: 65px !important;
+                  display: flex !important;
+                  align-items: center !important;
+                  padding: 0 15px !important;
+                  font-size: 20px !important;
+                  line-height: normal !important;
+                }
+                
+                /* Logo */
+                .navbar-brand img {
+                  height: 30px;
+                  width: auto;
+                  margin-right: 8px;
+                }
+                
+                /* Navigation tabs */
+                .navbar-nav > li {
+                  height: 65px;
+                  display: flex;
+                  align-items: center;
+                }
+                
+                .navbar-nav > li > a {
+                  padding: 0 15px !important;
+                  line-height: 65px !important;
+                  font-size: 16px !important;
+                }
+                
+                
 
                 ")),
                 
@@ -371,7 +407,14 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 ###################
               
                 navbarPage(
-                  "DNA Tools",
+                  title = tags$div(
+                    style = "display: flex; align-items: center; gap: 10px;",
+                    tags$img(
+                      src = "logo.svg",
+                      style = "height: 30px; width: auto;"
+                    ),
+                    "DNA Tools"
+                  ),
                   id = "selected_tab",
                 
                   ##################################
