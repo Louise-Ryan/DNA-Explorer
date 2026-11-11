@@ -19,8 +19,11 @@
 - [Features](#features)
   - [Reverse Complement](#reverse-complement)
   - [Six-Frame Translation](#six-frame-translation)
+  - [Bulk Translation](#bulk-translation)
+  - [Sumamrise Dataset](#summarise-dataset)
   - [Get Subsequence](#get-subsequence)
-  - [Bulk Sequence Analysis](#bulk-sequence-analysis)
+  - [Compare Sets](#compare-sets)
+
 
 <br>
 
@@ -44,8 +47,14 @@
 <a id="six-frame-translation"></a>
 <h3> Six-Frame Translation</h3>
 
+<a id="bulk-translation"></a>
+<h3> Bulk Translation</h3>
+
+<a id="summarise-dataset"></a>
+<h3> Summarise Dataset</h3>
+
 <a id="get-subsequence"></a>
 <h3> Get Subsequence</h3>
 
-<a id="bulk-sequence-analysis"></a>
-<h3> Bulk Sequence Analysis</h3>
+<a id="compare-sets"></a>
+<h3> Compare Sets</h3>
