@@ -8,7 +8,7 @@
 
 **Project currently in development, check back for updates!**
 
-**Try it here:** [DNA Tools](https://01a1c122-b5fc-c9fc-8e15-3c86ad473dd4.share.connect.posit.cloud/)
+**Try it here:** [DNA Tools](https://louiseryan-dna-tools.share.connect.posit.cloud/)
 
 <br>
 
