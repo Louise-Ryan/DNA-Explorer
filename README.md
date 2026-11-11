@@ -9,3 +9,43 @@
 **Project currently in development, check back for updates!**
 
 **Try it here:** [DNA Tools](https://01a1c122-b5fc-c9fc-8e15-3c86ad473dd4.share.connect.posit.cloud/)
+
+<br>
+
+## 📖 Contents
+- [Accessing the App](#access)
+  - [Web server](#web-server)
+  - [Running the app locally](#local)
+- [Features](#features)
+  - [Reverse Complement](#reverse-complement)
+  - [Six-Frame Translation](#six-frame-translation)
+  - [Get Subsequence](#get-subsequence)
+  - [Bulk Sequence Analysis](#bulk-sequence-analysis)
+
+<br>
+
+<a id="access"></a>
+<h2> 🔗 Accessing the App</h2>
+
+<a id="web-server"></a>
+<h3>🌍 Web Server:</h3>
+
+<a id="local"></a>
+<h3>💻 Running the App Locally:</h3>
+
+<br>
+
+<a id="features"></a>
+<h2> 🧬 Features </h2>
+
+<a id="reverse-complement"></a>
+<h3> Reverse Complement</h3>
+
+<a id="six-frame-translation"></a>
+<h3> Six-Frame Translation</h3>
+
+<a id="get-subsequence"></a>
+<h3> Get Subsequence</h3>
+
+<a id="bulk-sequence-analysis"></a>
+<h3> Bulk Sequence Analysis</h3>
