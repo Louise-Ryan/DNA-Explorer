@@ -341,7 +341,20 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   line-height: 65px !important;
                   font-size: 16px !important;
                 }
-                
+                /* Remove gap between navbar and tab content */
+.navbar {
+  margin-bottom: 0 !important;
+}
+
+.tab-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Remove top spacing from tab panels */
+.tab-content > .tab-pane {
+  padding-top: 0 !important;
+}
                 
 
                 ")),
@@ -429,10 +442,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                            
                            tags$div(
                              style = "background-color: #422538;
-                               padding: 10px 15px 0px 15px;
-                               border-radius: 6px;
+                               padding: 25px 15px 0px 15px;
+                               border-radius: 0px;
                                margin-bottom: 15px;
-                               margin-left: -15px;",
+                               margin-left: -15px;
+                               margin-right: -15px;",
                              
                              tags$h2(
                                "Six Frame Translation",
@@ -546,10 +560,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                            
                            tags$div(
                              style = "background-color: #422538;
-                               padding: 10px 15px 0px 15px;
-                               border-radius: 6px;
+                              padding: 25px 15px 0px 15px;
+                               border-radius: 0px;
                                margin-bottom: 15px;
-                               margin-left: -15px;",
+                               margin-left: -15px;
+                               margin-right: -15px;",
                              
                              tags$h2(
                                "Bulk Translation",
@@ -653,10 +668,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     
                     tags$div(
                       style = "background-color: #422538;
-                               padding: 10px 15px 0px 15px;
-                               border-radius: 6px;
+                               padding: 25px 15px 0px 15px;
+                               border-radius: 0px;
                                margin-bottom: 15px;
-                               margin-left: -15px;",
+                               margin-left: -15px;
+                               margin-right: -15px;",
                       
                       tags$h2(
                         "Compare Sets",
@@ -863,10 +879,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                            
                            tags$div(
                              style = "background-color: #422538;
-                               padding: 10px 15px 0px 15px;
-                               border-radius: 6px;
+                               padding: 25px 15px 0px 15px;
+                               border-radius: 0px;
                                margin-bottom: 15px;
-                               margin-left: -15px;",
+                               margin-left: -15px;
+                               margin-right: -15px;",
                              
                              tags$h2(
                                "Reverse Complement",
