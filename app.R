@@ -55,12 +55,6 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   /* Increase DNA/RNA radio button text size */
                   .shiny-options-group {font-size: 18px;}
 
-                  /* Set minimum and maximum output box height and enable scrolling */
-                  #txtout {min-height: 150px; max-height: 300px; overflow-y: auto;}
-
-                   /* Set minimum and maximum output box height and enable scrolling txt3 */
-                  #txtout3 {min-height: 150px; max-height: 300px; overflow-y: auto;}
-
                   /* Reverse complement output box */
                   #txtout {
                     display: block;
@@ -294,7 +288,25 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   border-radius: 5px;
                   white-space: pre-wrap;
                   word-wrap: break-word;
-              }
+                }
+                
+                /* Allow text input boxes to resize vertically */
+                textarea {
+                resize: vertical !important;
+                }
+                
+                /* Set minimum and maximum output box height and enable scrolling */
+                #txtout pre,
+                #txtout2 pre,
+                #txtout3 pre,
+                #txtout4 pre,
+                #txtout5 pre {
+                  min-height: 150px;
+                  max-height: 300px;
+                  overflow-y: auto;
+                  resize: vertical;
+                  margin-bottom: 15px;
+                } 
 
                 ")),
                 
@@ -367,6 +379,44 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   ###################################
                   
                   tabPanel("Six Frame Translation",
+                           
+                           #################
+                           # Page header
+                           #################
+                           
+                           tags$div(
+                             style = "background-color: #422538;
+                               padding: 10px 15px 0px 15px;
+                               border-radius: 6px;
+                               margin-bottom: 15px;
+                               margin-left: -15px;",
+                             
+                             tags$h2(
+                               "Six Frame Translation",
+                               style = "font-weight: bold;
+                                 margin: 0 0 15px 0;
+                                 padding: 0;
+                                 color: white;"
+                             ),
+                             
+                             tags$p(
+                               "Translate a nucleotide DNA/RNA sequence across all six reading frames and generate a summary table detailing information about open reading frames (ORFs).",
+                               style = "font-weight: normal;
+                                 font-size: 16px;
+                                 color: #dddddd;
+                                 margin: 0 0 10px 0;
+                                 padding: 0;"
+                             ),
+                             
+                             tags$div(
+                               style = "background-color: #6f2555;
+                                 height: 4px;
+                                 width: calc(100% + 30px);
+                                 margin-left: -15px;
+                                 margin-right: -15px;
+                                 border-radius: 3px;"
+                             )
+                           ),
                            
                            ################
                            # Text Input
@@ -447,22 +497,78 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   
                   tabPanel("Bulk Translation",
                            
+                           #################
+                           # Page header
+                           #################
+                           
+                           tags$div(
+                             style = "background-color: #422538;
+                               padding: 10px 15px 0px 15px;
+                               border-radius: 6px;
+                               margin-bottom: 15px;
+                               margin-left: -15px;",
+                             
+                             tags$h2(
+                               "Bulk Translation",
+                               style = "font-weight: bold;
+                                 margin: 0 0 15px 0;
+                                 padding: 0;
+                                 color: white;"
+                             ),
+                             
+                             tags$p(
+                               "Translate multiple nucleotide sequences in FASTA format and generate a summary of all translated sequences.",
+                               style = "font-weight: normal;
+                                 font-size: 16px;
+                                 color: #dddddd;
+                                 margin: 0 0 10px 0;
+                                 padding: 0;"
+                             ),
+                             
+                             tags$div(
+                               style = "background-color: #6f2555;
+                                 height: 4px;
+                                 width: calc(100% + 30px);
+                                 margin-left: -15px;
+                                 margin-right: -15px;
+                                 border-radius: 3px;"
+                             )
+                           ),
+                           
                            ################
                            # Text Input
                            ################
                            
                            fluidRow(
-                             column( width = 12,
-                                     tags$h3("Input Sequence:"),
-                                     textAreaInput(
-                                       "txt3",
-                                       tags$label("Please enter your nucleotide dataset. Sequences must be in fasta format (i.e fasta header is required). Multiple sequences accepted.",
-                                                  style = "font-weight: normal;"),
-                                       "",
-                                       width = "100%",
-                                       rows = 10
-                                     ),
-                                     actionButton("submit_bulk_translation", "Submit"))
+                             column(
+                               width = 12,
+                               
+                               tags$div(
+                                 style = "margin-bottom: 15px;",
+                                 
+                                 tags$h3("Input Dataset:"),
+                                 
+                                 tags$p(
+                                   "Enter your nucleotide dataset below. Sequences must be in FASTA format.",
+                                   style = "font-weight: normal; font-size: 18px; margin-bottom: 5px;"
+                                 ),
+                                 
+                                 tags$p(
+                                   "Multiple sequences are accepted. FASTA headers are required. RNA sequences will automatically be converted to DNA (U → T).",
+                                   style = "font-style: italic; color: #999999; font-size: 15px;"
+                                 ),
+                                 
+                                 textAreaInput(
+                                   "txt3",
+                                   label = NULL,
+                                   "",
+                                   width = "100%",
+                                   rows = 10
+                                 )
+                               ),
+                               
+                               actionButton("submit_bulk_translation", "Submit")
+                             )
                            ),
                            
                            ###############################
@@ -502,10 +608,38 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     # Page header
                     #################
                     
-                    tags$h3("Compare Sets"),
-                    tags$p(
-                      "Compare two or three sets to identify shared and unique items. Useful for gene names, IDs, genomic coordinates and other lists. Enter each list with one item per line. The results include a Venn diagram and a summary of items shared between lists.",
-                      style = "font-weight: normal;"
+                    tags$div(
+                      style = "background-color: #422538;
+                               padding: 10px 15px 0px 15px;
+                               border-radius: 6px;
+                               margin-bottom: 15px;
+                               margin-left: -15px;",
+                      
+                      tags$h2(
+                        "Compare Sets",
+                        style = "font-weight: bold;
+                                 margin: 0 0 15px 0;
+                                 padding: 0;
+                                 color: white;"
+                      ),
+                      
+                      tags$p(
+                        "Compare two or three sets to identify shared and unique items. Example use cases include comparing gene/protein names, accession IDs, genomic coordinates and other lists.",
+                        style = "font-weight: normal;
+                                 font-size: 16px;
+                                 color: #dddddd;
+                                 margin: 0 0 10px 0;
+                                 padding: 0;"
+                      ),
+                      
+                      tags$div(
+                        style = "background-color: #6f2555;
+                                 height: 4px;
+                                 width: calc(100% + 30px);
+                                 margin-left: -15px;
+                                 margin-right: -15px;
+                                 border-radius: 3px;"
+                      )
                     ),
                     
                     ####################
@@ -513,6 +647,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     ####################
                     
                     tags$h3("Number of Sets:"),
+                    
                     radioButtons(
                       "no_sets",
                       label = NULL,
@@ -520,9 +655,10 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                       selected = "2 Sets",
                       inline = TRUE
                     ),
+                    
                     tags$p(
-                      "Please note: This feature accepts lists of items, not FASTA formated sequences.",
-                      style = "font-style: italic; color: #8b8b8b;"
+                      "Please note: This feature accepts lists of items, not FASTA-formatted sequences.",
+                      style = "font-style: italic; color: #999999; font-size: 15px;"
                     ),
                     
                     ############################
@@ -677,6 +813,44 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   #####################################
                   
                   tabPanel("Reverse Complement",
+                          
+                           #################
+                           # Page header
+                           #################
+                           
+                           tags$div(
+                             style = "background-color: #422538;
+                               padding: 10px 15px 0px 15px;
+                               border-radius: 6px;
+                               margin-bottom: 15px;
+                               margin-left: -15px;",
+                             
+                             tags$h2(
+                               "Reverse Complement",
+                               style = "font-weight: bold;
+                                 margin: 0 0 15px 0;
+                                 padding: 0;
+                                 color: white;"
+                             ),
+                             
+                             tags$p(
+                               "Calculate the reverse complement for a given DNA/RNA sequence.",
+                               style = "font-weight: normal;
+                                 font-size: 16px;
+                                 color: #dddddd;
+                                 margin: 0 0 10px 0;
+                                 padding: 0;"
+                             ),
+                             
+                             tags$div(
+                               style = "background-color: #6f2555;
+                                 height: 4px;
+                                 width: calc(100% + 30px);
+                                 margin-left: -15px;
+                                 margin-right: -15px;
+                                 border-radius: 3px;"
+                             )
+                           ),
                            
                            ##########################
                            # Sequence Type Selection
@@ -699,17 +873,34 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                            ###################
                            
                            fluidRow(
-                             column(width = 12,
-                                    tags$h3("Input Sequence:"),
-                                    textAreaInput(
-                                      "txt1",
-                                      tags$label("Please enter your nucleotide sequence in the text box below. Fasta headers are accepted. Please enter one sequence at a time.",
-                                                 style = "font-weight: normal;"),
-                                      "",
-                                      width = "100%",
-                                      rows = 10
-                                    ),
-                                    actionButton("submit_reverse_comp", "Submit")
+                             column(
+                               width = 12,
+                               
+                               tags$div(
+                                 style = "margin-bottom: 15px;",
+                                 
+                                 tags$h3("Input Sequence:"),
+                                 
+                                 tags$p(
+                                   "Please enter your nucleotide sequence in the text box below.",
+                                   style = "font-weight: normal; font-size: 18px; margin-bottom: 5px;"
+                                 ),
+                                 
+                                 tags$p(
+                                   "FASTA headers are accepted. Please enter one sequence at a time.",
+                                   style = "font-style: italic; color: #999999; font-size: 15px;"
+                                 ),
+                                 
+                                 textAreaInput(
+                                   "txt1",
+                                   label = NULL,
+                                   "",
+                                   width = "100%",
+                                   rows = 10
+                                 )
+                               ),
+                               
+                               actionButton("submit_reverse_comp", "Submit")
                              )
                            ),
                            
@@ -733,13 +924,13 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                     
                                     # Reverse complement diagram
                                     condition = "input.submit_reverse_comp > 0",
-                                    h3("How It Works:", style = "margin-top: 60px;padding-bottom: 20px"),
+                                    h3("How It Works:", style = "margin-top: 40px;padding-bottom: 20px"),
                                     
                                     tags$div(
                                       style = "text-align: left; margin-top: 20px; padding-bottom: 100px;",
                                       tags$img(
                                         src = "Reverse-complement.svg",
-                                        style = "width: 60%; height: auto;"))))
+                                        style = "width: 45%; height: auto;"))))
                   ),
                   
                   ##############################################
