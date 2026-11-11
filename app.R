@@ -63,9 +63,10 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     overflow-wrap: break-word;
                   }
                   
-                 /* Make translation summary containers full width */
+                /* Make summary containers full width */
                 #translation_summary,
-                #bulk_translation_summary {
+                #bulk_translation_summary,
+                #compare_sets_table {
                   display: block;
                   width: 100% !important;
                 }
@@ -73,16 +74,19 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 /* Make the actual tables fill their containers */
                 #translation_summary table,
                 #bulk_translation_summary table,
+                #compare_sets_table table,
                 table#translation_summary,
-                table#bulk_translation_summary {
+                table#bulk_translation_summary,
+                table#compare_sets_table {
                   width: 100% !important;
                   min-width: 100% !important;
                   table-layout: fixed;
                 }
                 
-                /* Translation summary tables */
+                /* Summary tables */
                 #translation_summary,
-                #bulk_translation_summary {
+                #bulk_translation_summary,
+                #compare_sets_table {
                   width: 100%;
                   border-collapse: separate;
                   border-spacing: 0;
@@ -96,7 +100,8 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 
                 /* Table headings */
                 #translation_summary th,
-                #bulk_translation_summary th {
+                #bulk_translation_summary th,
+                #compare_sets_table th {
                   background-color: #6f2555;
                   color: white;
                   font-weight: 600;
@@ -108,7 +113,8 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 
                 /* Table cells */
                 #translation_summary td,
-                #bulk_translation_summary td {
+                #bulk_translation_summary td,
+                #compare_sets_table td {
                   text-align: center;
                   padding: 12px;
                   border: none;
@@ -117,36 +123,106 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                 
                 /* Alternating row colours */
                 #translation_summary tbody tr:nth-child(odd),
-                #bulk_translation_summary tbody tr:nth-child(odd) {
+                #bulk_translation_summary tbody tr:nth-child(odd),
+                #compare_sets_table tbody tr:nth-child(odd) {
                   background-color: #292929;
                 }
                 
                 #translation_summary tbody tr:nth-child(even),
-                #bulk_translation_summary tbody tr:nth-child(even) {
+                #bulk_translation_summary tbody tr:nth-child(even),
+                #compare_sets_table tbody tr:nth-child(even) {
                   background-color: #333333;
                 }
                 
                 /* Hover effect */
                 #translation_summary tbody tr:hover,
-                #bulk_translation_summary tbody tr:hover {
+                #bulk_translation_summary tbody tr:hover,
+                #compare_sets_table tbody tr:hover {
                   background-color: #492b43;
                   transition: background-color 0.2s ease;
                 }
                 
-                /* First column - frame names */
+                /* First column */
                 #translation_summary td:first-child,
-                #bulk_translation_summary td:first-child {
+                #bulk_translation_summary td:first-child,
+                #compare_sets_table td:first-child {
                   color: white;
                   font-weight: 600;
                   text-align: center;
                 }
                 
-           
-                
                 /* Remove final row border */
                 #translation_summary tbody tr:last-child td,
-                #bulk_translation_summary tbody tr:last-child td {
+                #bulk_translation_summary tbody tr:last-child td,
+                #compare_sets_table tbody tr:last-child td {
                   border-bottom: none;
+                }
+                
+                /* Compare Sets filter inputs */
+                #filter_gene,
+                #filter_set1,
+                #filter_set2,
+                #filter_set3 {
+                  background-color: #6f2555;
+                  color: white;
+                  border: 1px solid #8a3970;
+                }
+                
+                /* Dropdown options */
+                #filter_set1 option,
+                #filter_set2 option,
+                #filter_set3 option {
+                  background-color: #6f2555;
+                  color: white;
+                }
+                
+                /* Placeholder text */
+                #filter_gene::placeholder {
+                  color: #dddddd;
+                  opacity: 1;
+                }
+                
+                /* Input focus */
+                #filter_gene:focus,
+                #filter_set1:focus,
+                #filter_set2:focus,
+                #filter_set3:focus {
+                  border-color: #ca2591;
+                  box-shadow: 0 0 5px #ca2591;
+                }
+                /* Set dropdowns */
+                #filter_set1 + .selectize-control .selectize-input,
+                #filter_set2 + .selectize-control .selectize-input,
+                #filter_set3 + .selectize-control .selectize-input {
+                  background: #6f2555 !important;
+                  color: white !important;
+                  border: 1px solid #8a3970 !important;
+                  box-shadow: none !important;
+                }
+                
+                /* Selected text */
+                #filter_set1 + .selectize-control .item,
+                #filter_set2 + .selectize-control .item,
+                #filter_set3 + .selectize-control .item {
+                  color: white !important;
+                }
+                
+                /* Dropdown menu */
+                .selectize-dropdown {
+                  background: #6f2555 !important;
+                  color: white !important;
+                  border: 1px solid #8a3970 !important;
+                }
+                
+                /* Dropdown options */
+                .selectize-dropdown .option {
+                  color: white !important;
+                }
+                
+                /* Hovered option */
+                .selectize-dropdown .active {
+                  background: #ca2591 !important;
+                  color: white !important;
                 }
                   
                 ")),
@@ -348,10 +424,158 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                       condition = "input.submit_bulk_translation > 0",
                                       div(style = "text-align: right;",
                                           actionButton("copy_bulk_translation", "Copy to Clipboard")))))
-                  ),                  
+                  ),
+                  tabPanel(
+                    "Compare Sets",
+                    
+                    tags$h3("Compare Sets"),
+                    tags$p(
+                      "Compare two or three sets to identify shared and unique items. Useful for gene names, IDs, genomic coordinates and other lists. Enter each list with one item per line. The results include a Venn diagram and a summary of items shared between lists.",
+                      style = "font-weight: normal;"
+                    ),
+                    
+                    tags$h3("Number of Sets:"),
+                    radioButtons(
+                      "no_sets",
+                      label = NULL,
+                      choices = c("2 Sets", "3 Sets"),
+                      selected = "2 Sets",
+                      inline = TRUE
+                    ),
+                    tags$p(
+                      "Please note: This feature accepts lists of items, not FASTA formated sequences.",
+                      style = "font-style: italic; color: #8b8b8b;"
+                    ),
+                    
+                    # Layout for two sets
+                    conditionalPanel(
+                      condition = "input.no_sets == '2 Sets'",
+                      fluidRow(
+                        column(
+                          width = 6,
+                          textAreaInput(
+                            "set1", "Set 1:",
+                            placeholder = "Enter Set 1",
+                            width = "100%",
+                            rows = 8
+                          )
+                        ),
+                        column(
+                          width = 6,
+                          textAreaInput(
+                            "set2", "Set 2:",
+                            placeholder = "Enter Set 2",
+                            width = "100%",
+                            rows = 8
+                          )
+                        )
+                      )
+                    ),
+                    
+                    # Layout for three sets
+                    conditionalPanel(
+                      condition = "input.no_sets == '3 Sets'",
+                      fluidRow(
+                        column(
+                          width = 4,
+                          textAreaInput(
+                            "set1_3", "Set 1:",
+                            placeholder = "Enter Set 1",
+                            width = "100%",
+                            rows = 8
+                          )
+                        ),
+                        column(
+                          width = 4,
+                          textAreaInput(
+                            "set2_3", "Set 2:",
+                            placeholder = "Enter Set 2",
+                            width = "100%",
+                            rows = 8
+                          )
+                        ),
+                        column(
+                          width = 4,
+                          textAreaInput(
+                            "set3", "Set 3:",
+                            placeholder = "Enter Set 3",
+                            width = "100%",
+                            rows = 8
+                          )
+                        )
+                      )
+                    ),
+                    tags$div(
+                      tags$p(
+                        "If case sensitive is selected, GENE1 and gene1 will be treated as different entries.",
+                        style = "font-style: italic; color: #8b8b8b; margin-top: -10px;"
+                      ),
+                      checkboxInput(
+                        "case_sensitive",
+                        "Case-sensitive",
+                        value = FALSE
+                      )
+                    ),
+                    actionButton(
+                      "submit_compare_sets",
+                      "Compare Sets",
+                      class = "btn-primary"
+                    ),
+                    conditionalPanel(
+                      condition = "input.submit_compare_sets > 0",
+                      fluidRow(
+                        column(
+                          width = 12,
+                          h3("Comparison Results:"),
+                          
+                          fluidRow(
+                            column(
+                              width = 6,
+                              textInput(
+                                "filter_gene",
+                                "Search item:",
+                                placeholder = "Enter item name or ID..."
+                              )
+                            ),
+                            column(
+                              width = 2,
+                              selectInput(
+                                "filter_set1",
+                                "Set 1:",
+                                choices = c("All", "Yes", "No"),
+                                selected = "All"
+                              )
+                            ),
+                            column(
+                              width = 2,
+                              selectInput(
+                                "filter_set2",
+                                "Set 2:",
+                                choices = c("All", "Yes", "No"),
+                                selected = "All"
+                              )
+                            ),
+                            column(
+                              width = 2,
+                              conditionalPanel(
+                                condition = "input.no_sets == '3 Sets'",
+                                selectInput(
+                                  "filter_set3",
+                                  "Set 3:",
+                                  choices = c("All", "Yes", "No"),
+                                  selected = "All"
+                                )
+                              )
+                            )
+                          ),
+                          
+                          DTOutput("compare_sets_table")
+                        )
+                      )
+                    )
+                  ),
                   
-                  tabPanel("Summarise dataset", "This feature will be built soon"),
-                  tabPanel("Pairwise comparissons", "This feature will be built soon"),
+                  tabPanel("Summarise Dataset", "This feature will be built soon"),
                   tabPanel("Get Subsequence", "This feature will be built soon"),
   
                 ) # navbarPage
@@ -993,15 +1217,136 @@ server <- function(input, output) {
         digits = 0
       )
   })
-  # Display translation summary
-  #output$bulk_translation_summary <- renderTable({
-  #  summary <- bulk_translation_data()$summary
-  #  colnames(summary) <- gsub("_", " ", colnames(summary))
-  #  summary
-  #}, digits = 0, align = "c")
+
+  ##########################
+  # 4. Compare Sets
+  ##########################
+  
+  compare_sets_data <- eventReactive(input$submit_compare_sets, {
+    
+    # Retrieve input lists
+    if (input$no_sets == "2 Sets") {
+      sets <- list(
+        "Set 1" = input$set1,
+        "Set 2" = input$set2
+      )
+    } else {
+      sets <- list(
+        "Set 1" = input$set1_3,
+        "Set 2" = input$set2_3,
+        "Set 3" = input$set3
+      )
+    }
+    
+    # Split lists by newline
+    sets <- lapply(sets, function(x) {
+      
+      if (is.null(x) || !nzchar(trimws(x))) {
+        return(character(0))
+      }
+      
+      x <- gsub("\r", "", x)
+      x <- strsplit(x, "\n", fixed = TRUE)[[1]]
+      x <- trimws(x)
+      
+      # Convert to uppercase if comparison is not case-sensitive
+      if (!isTRUE(input$case_sensitive)) {
+        x <- toupper(x)
+      }
+      
+      # Remove empty entries and duplicates
+      unique(x[nzchar(x)])
+      
+    })
+    
+    # Validate number of populated sets
+    validate(
+      need(
+        sum(lengths(sets) > 0) >= 2,
+        "Please enter items in at least two sets before comparing."
+      )
+    )
+    
+    # Return lists
+    return(sets)
+    
+  })
   
   
+  # Generate comparison table
+  compare_sets_table_data <- reactive({
+    
+    # Retrieve submitted lists
+    sets <- compare_sets_data()
+    
+    # Identify all unique items
+    all_items <- sort(unique(unlist(sets)))
+    
+    # Initialise summary dataframe
+    summary <- data.frame(
+      Item = all_items,
+      stringsAsFactors = FALSE
+    )
+    
+    # Determine membership of each item in each set
+    for (i in seq_along(sets)) {
+      
+      summary[[names(sets)[i]]] <- ifelse(
+        all_items %in% sets[[i]],
+        "Yes",
+        "No"
+      )
+      
+    }
+    
+    return(summary)
+    
+  })
+  # Display comparison table
+  output$compare_sets_table <- DT::renderDT({
+    
+    DT::datatable(
+      filtered_compare_sets_table(),
+      rownames = FALSE,
+      filter = "none",
+      options = list(
+        pageLength = 10,
+        scrollX = TRUE,
+        dom = "ftip"
+      )
+    )
+    
+  })
+  # Filter comparison table
+  filtered_compare_sets_table <- reactive({
+    
+    data <- compare_sets_table_data()
+    # Filter by gene name / item
+    if (nzchar(input$filter_gene)) {
+      data <- data[
+        grepl(input$filter_gene, data$Item, ignore.case = TRUE),
+      ]
+    }
+    
+    if (input$filter_set1 != "All") {
+      data <- data[data$`Set 1` == input$filter_set1, ]
+    }
+    
+    if (input$filter_set2 != "All") {
+      data <- data[data$`Set 2` == input$filter_set2, ]
+    }
+    
+    if ("Set 3" %in% names(data) && input$filter_set3 != "All") {
+      data <- data[data$`Set 3` == input$filter_set3, ]
+    }
+    
+    data
+    
+  })
+  
+  ############################
   # Subsequence code goes here
+  ############################
   
 }
 
