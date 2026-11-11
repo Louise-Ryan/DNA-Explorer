@@ -10,7 +10,7 @@ These tools come up regularly during bioinformatics workflows, but can often req
 
 **Project currently in development, check back for updates!**
 
-**Try it here:** 🌐 [DNA Tools](https://louiseryan-dna-tools.share.connect.posit.cloud/)
+**Try it here:** 🌐 [DNA Tools](https://louryan.shinyapps.io/dna-tools/)
 
 <br>
 
@@ -34,9 +34,9 @@ These tools come up regularly during bioinformatics workflows, but can often req
 <a id="web-server"></a>
 <h3>🌍 Web Server</h3>
 
-DNA Tools is hosted online using **Posit Connect Cloud** and can be accessed directly through a web browser without requiring a local installation.
+DNA Tools is hosted online using **shinyapps.io** and can be accessed directly through a web browser without requiring a local installation.
 
-**Access the application:** [DNA Tools](https://louiseryan-dna-tools.share.connect.posit.cloud/)
+**Access the application:** [DNA Tools](https://louryan.shinyapps.io/dna-tools/)
 
 The application may take a few moments to start if it has been inactive.
 
