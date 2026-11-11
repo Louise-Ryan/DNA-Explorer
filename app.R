@@ -1,11 +1,16 @@
+####################
 # Load R packages
+####################
+
 library(shiny)
 library(shinythemes)
-#library(dplyr)
 library(Biostrings)
 library(DT)
 
+#################
 # Define UI
+#################
+
 ui <- fluidPage(theme = shinytheme("darkly"),
                 tags$head(
                   tags$meta(
@@ -13,16 +18,24 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     content = "width=device-width, initial-scale=1"
                   )
                 ),
+                
+                ###########################
+                # Styles and formatting
+                ###########################
+                
                 tags$style(HTML("
+                
                   /* Add padding to bottom of page */
                   body {
                     padding-bottom: 60px;
                   }
+                  
                   /* Change navbar banner colour */
                   .navbar {
                     background-color: #6f2555 !important;
                     border-color: #6f2555 !important;
                   }
+                  
                   /* Change selected tab background colour */
                   .navbar-default .navbar-nav > .active > a,
                   .navbar-default .navbar-nav > .active > a:hover,
@@ -30,6 +43,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     background-color: #ca2591 !important;
                     color: white !important;
                   }
+                  
                   /* Disable hover effect on DNA Tools title */
                   .navbar-default .navbar-brand:hover,
                   .navbar-default .navbar-brand:focus {
@@ -37,17 +51,16 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     color: white !important;
                     cursor: default;
                   }
+                  
                   /* Increase DNA/RNA radio button text size */
                   .shiny-options-group {font-size: 18px;}
 
-                
                   /* Set minimum and maximum output box height and enable scrolling */
                   #txtout {min-height: 150px; max-height: 300px; overflow-y: auto;}
-                  
+
                    /* Set minimum and maximum output box height and enable scrolling txt3 */
                   #txtout3 {min-height: 150px; max-height: 300px; overflow-y: auto;}
-                  
-                  
+
                   /* Reverse complement output box */
                   #txtout {
                     display: block;
@@ -55,14 +68,14 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     min-height: 0;
                     margin-bottom: 20px;
                   }
-                  
+
                   #txtout pre {
                     display: block;
                     margin-bottom: 0;
                     white-space: pre-wrap;
                     overflow-wrap: break-word;
                   }
-                  
+
                 /* Make summary containers full width */
                 #translation_summary,
                 #bulk_translation_summary,
@@ -70,7 +83,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   display: block;
                   width: 100% !important;
                 }
-                
+
                 /* Make the actual tables fill their containers */
                 #translation_summary table,
                 #bulk_translation_summary table,
@@ -82,7 +95,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   min-width: 100% !important;
                   table-layout: fixed;
                 }
-                
+
                 /* Summary tables */
                 #translation_summary,
                 #bulk_translation_summary,
@@ -97,7 +110,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   font-size: 14px;
                   margin-top: 15px;
                 }
-                
+
                 /* Table headings */
                 #translation_summary th,
                 #bulk_translation_summary th,
@@ -110,7 +123,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   border: none;
                   letter-spacing: 0.3px;
                 }
-                
+
                 /* Table cells */
                 #translation_summary td,
                 #bulk_translation_summary td,
@@ -120,20 +133,20 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   border: none;
                   border-bottom: 1px solid #444;
                 }
-                
+
                 /* Alternating row colours */
                 #translation_summary tbody tr:nth-child(odd),
                 #bulk_translation_summary tbody tr:nth-child(odd),
                 #compare_sets_table tbody tr:nth-child(odd) {
                   background-color: #292929;
                 }
-                
+
                 #translation_summary tbody tr:nth-child(even),
                 #bulk_translation_summary tbody tr:nth-child(even),
                 #compare_sets_table tbody tr:nth-child(even) {
                   background-color: #333333;
                 }
-                
+
                 /* Hover effect */
                 #translation_summary tbody tr:hover,
                 #bulk_translation_summary tbody tr:hover,
@@ -141,7 +154,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   background-color: #492b43;
                   transition: background-color 0.2s ease;
                 }
-                
+
                 /* First column */
                 #translation_summary td:first-child,
                 #bulk_translation_summary td:first-child,
@@ -150,14 +163,14 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   font-weight: 600;
                   text-align: center;
                 }
-                
+
                 /* Remove final row border */
                 #translation_summary tbody tr:last-child td,
                 #bulk_translation_summary tbody tr:last-child td,
                 #compare_sets_table tbody tr:last-child td {
                   border-bottom: none;
                 }
-                
+
                 /* Compare Sets filter inputs */
                 #filter_gene,
                 #filter_set1,
@@ -167,7 +180,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   color: white;
                   border: 1px solid #8a3970;
                 }
-                
+
                 /* Dropdown options */
                 #filter_set1 option,
                 #filter_set2 option,
@@ -175,13 +188,13 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   background-color: #6f2555;
                   color: white;
                 }
-                
+
                 /* Placeholder text */
                 #filter_gene::placeholder {
                   color: #dddddd;
                   opacity: 1;
                 }
-                
+
                 /* Input focus */
                 #filter_gene:focus,
                 #filter_set1:focus,
@@ -199,52 +212,112 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   border: 1px solid #8a3970 !important;
                   box-shadow: none !important;
                 }
-                
+
                 /* Selected text */
                 #filter_set1 + .selectize-control .item,
                 #filter_set2 + .selectize-control .item,
                 #filter_set3 + .selectize-control .item {
                   color: white !important;
                 }
-                
+
                 /* Dropdown menu */
                 .selectize-dropdown {
                   background: #6f2555 !important;
                   color: white !important;
                   border: 1px solid #8a3970 !important;
                 }
-                
+
                 /* Dropdown options */
                 .selectize-dropdown .option {
                   color: white !important;
                 }
-                
+
                 /* Hovered option */
                 .selectize-dropdown .active {
                   background: #ca2591 !important;
                   color: white !important;
                 }
-                  
+                
+                /* Format all text input boxes */
+                #txt1,
+                #txt2,
+                #txt3,
+                #set1,
+                #set2,
+                #set1_3,
+                #set2_3,
+                #set3 {
+                  background-color: #2b2b2b;
+                  color: white;
+                  border: 3px solid #6f2555;
+                  font-family: monospace;
+                  font-size: 14px;
+                }
+                
+                /* Text selection */
+                #txt1::selection,
+                #txt2::selection,
+                #txt3::selection,
+                #set1::selection,
+                #set2::selection,
+                #set1_3::selection,
+                #set2_3::selection,
+                #set3::selection {
+                  background-color: #6f2555;
+                  color: white;
+                }
+                
+                /* Focus */
+                #txt1:focus,
+                #txt2:focus,
+                #txt3:focus,
+                #set1:focus,
+                #set2:focus,
+                #set1_3:focus,
+                #set2_3:focus,
+                #set3:focus {
+                  border-color: #ca2591;
+                  box-shadow: 0 0 5px #ca2591;
+                }
+                
+                /* All sequence output boxes */
+                #txtout pre,
+                #txtout2 pre,
+                #txtout3 pre {
+                  font-family: monospace !important;
+                  font-size: 14px;
+                  background-color: #2b2b2b;
+                  color: white;
+                  border: 3px solid #6f2555;
+                  font-family: monospace;
+                  padding: 15px;
+                  border-radius: 5px;
+                  white-space: pre-wrap;
+                  word-wrap: break-word;
+              }
+
                 ")),
+                
+                
                 tags$script(HTML("
-                
+
                 $(document).on('click', '#copy_sequence, #copy_translation, #copy_bulk_translation', function() {
-                
+
                   // Identify which output to copy
                   var output_id = this.id === 'copy_sequence' ? '#txtout' :
                                   this.id === 'copy_translation' ? '#txtout2' :
                                   this.id === 'copy_bulk_translation' ? '#txtout3' : '';
-                  
+
                   var output = document.querySelector(output_id + ' pre');
-                
+
                   if (!output) {
                     alert('Nothing to copy, please submit a sequence!');
                     return;
                   }
-                
+
                   // Extract sequence text
                   var sequence = output.textContent.trim();
-                
+
                   // Copy sequence to clipboard
                   if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(sequence)
@@ -257,7 +330,7 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   } else {
                     copyFallback(sequence);
                   }
-                
+
                   // Fallback clipboard function
                   function copyFallback(text) {
                     var textarea = document.createElement('textarea');
@@ -267,135 +340,119 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     document.body.appendChild(textarea);
                     textarea.focus();
                     textarea.select();
-                
+
                     try {
                       var successful = document.execCommand('copy');
                       alert(successful ? 'Sequence copied to clipboard!' : 'Unable to copy sequence.');
                     } catch (error) {
                       alert('Unable to copy sequence.');
                     }
-                
+
                     document.body.removeChild(textarea);
                   }
                 });
 
                 ")),
                 
-                
-                
+                ###################
+                # App UI Elements
+                ###################
+              
                 navbarPage(
-                  # theme = "cerulean",  # <--- To use a theme, uncomment this
                   "DNA Tools",
                   id = "selected_tab",
-                  
-                  #####################################
-                  # 1. Tool 1: Get reverse complement
-                  #####################################
-                  
-                  tabPanel("Reverse Complement",
-                           tags$h3("Sequence type:"),
-                           radioButtons(
-                             "sequence_type",
-                             label = tags$label(
-                               "Please select your sequence type. If you select RNA, uracil (U) will be used instead of thymine (T) and paired with adenine (A).",
-                               style = "font-weight: normal;"
-                             ),
-                             choices = c("DNA", "RNA"),
-                             selected = "DNA",
-                             inline = TRUE 
-                           ),
-                           
-
-                           # Input sequence
-                           fluidRow(
-                             column(width = 12, 
-                                    tags$h3("Input Sequence:"),
-                                    textAreaInput(
-                                      "txt1",
-                                      tags$label("Please enter your nucleotide sequence in the text box below. Fasta headers are accepted. Please enter one sequence at a time.",
-                                                 style = "font-weight: normal;"),
-                                      "",
-                                      width = "100%",
-                                      rows = 10
-                                    ),
-                                    actionButton("submit_reverse_comp", "Submit")
-                             )
-                           ), 
-                           
-                           # Reverse complement output
-                           fluidRow(
-                             column(width = 12,
-                                    
-                                    h3("Reverse Complement:"),
-                                    uiOutput("txtout"),
-                                    
-                                    # Copy to Clipboard button
-                                    conditionalPanel(
-                                      condition = "input.submit_reverse_comp > 0",
-                                      div(
-                                        style = "text-align: right;",
-                                        actionButton("copy_sequence", "Copy to Clipboard"))
-                                    ),
-                                    
-                                    # Reverse complement diagram
-                                    condition = "input.submit_reverse_comp > 0",
-                                    h3("How It Works:", style = "margin-top: 60px;padding-bottom: 20px"),
-                                    
-                                    tags$div(
-                                      style = "text-align: left; margin-top: 20px; padding-bottom: 100px;",
-                                      tags$img(
-                                        src = "Reverse-complement.svg",
-                                        style = "width: 60%; height: auto;"))))
-                  ),
-                  
-                  #########################
-                  # 2. Tool 2: Translation 
-                  #########################
+                
+                  ##################################
+                  # Tool 1: 6 frame Translation
+                  ###################################
                   
                   tabPanel("Six Frame Translation",
-                  fluidRow(
-                    column( width = 12, 
-                            tags$h3("Input Sequence:"),
-                            textAreaInput(
-                              "txt2",
-                              tags$label(
-                                "Please enter your nucleotide sequence in the text box below. FASTA headers are accepted but subsequently removed.",
-                                tags$br(),
-                                "Please enter one sequence at a time. RNA sequences will be converted to DNA (U → T).",
-                                style = "font-weight: normal;"
-                              ),
-                              "",
-                              width = "100%",
-                              rows = 10
-                            ),
-                            actionButton("submit_translation", "Submit"))
-                  ), 
-                  # Translation summary
-                  conditionalPanel(
-                    condition = "input.submit_translation > 0",
-                    fluidRow(
-                      column(width = 12,
-                             h3("Translation Summary:"),
-                             tableOutput("translation_summary")))
-                    ),
-                  fluidRow(
-                    column(width = 12,
-                           h3("Six Frame Translation:"),
-                           uiOutput("txtout2"),
-                           conditionalPanel(
-                             condition = "input.submit_translation > 0",
-                             div(style = "text-align: right;",
-                                 actionButton("copy_translation", "Copy to Clipboard")))))
-                    ),
-      
-                  
-         
-                  ########################
-                  # 3. Bulk translation
-                  ########################
-                  tabPanel("Bulk Translation",
+                           
+                           ################
+                           # Text Input
+                           ################
+                           
                            fluidRow(
-                             column( width = 12, 
+                             column(
+                               width = 12,
+                               
+                               tags$div(
+                                 style = "margin-bottom: 15px;",
+                                 
+                                 tags$h3("Input Sequence:"),
+                                 
+                                 tags$p(
+                                   "Enter your nucleotide sequence below. FASTA headers will be removed automatically.",
+                                   style = "font-weight: normal; font-size: 18px; margin-bottom: 5px;"
+                                 ),
+                                 
+                                 tags$p(
+                                   "One sequence at a time. RNA will automatically be converted to DNA (U → T).",
+                                   style = "font-style: italic; color: #999999; font-size: 15px;"
+                                 ),
+                                 
+                                 textAreaInput(
+                                   "txt2",
+                                   label = NULL,
+                                   "",
+                                   width = "100%",
+                                   rows = 10
+                                 )
+                               ),
+                               
+                               actionButton("submit_translation", "Submit")
+                             )
+                           ),
+                           
+                           #####################
+                           # Translation Output
+                           #####################
+                           
+                           fluidRow(
+                             column(
+                               width = 12,
+                               h3("Six Frame Translation:"),
+                               uiOutput("txtout2"),
+                               
+                               conditionalPanel(
+                                 condition = "input.submit_translation > 0",
+                                 div(
+                                   style = "text-align: right;",
+                                   actionButton("copy_translation", "Copy to Clipboard")
+                                 )
+                               )
+                             )
+                           ),
+                           
+                           ######################
+                           # Translation Summary
+                           ######################
+                           
+                           fluidRow(
+                             column(
+                               width = 12,
+                               tags$div(
+                                 style = "margin-bottom: 15px;",
+                                 h3("Translation Summary:"),
+                                 tableOutput("translation_summary")
+                               )
+                             )
+                           )
+                           
+                  ),
+                  
+                  ###########################
+                  # Tool 2. Bulk translation
+                  ############################
+                  
+                  tabPanel("Bulk Translation",
+                           
+                           ################
+                           # Text Input
+                           ################
+                           
+                           fluidRow(
+                             column( width = 12,
                                      tags$h3("Input Sequence:"),
                                      textAreaInput(
                                        "txt3",
@@ -406,16 +463,24 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                        rows = 10
                                      ),
                                      actionButton("submit_bulk_translation", "Submit"))
-                           ), 
-                           # Translation summary
+                           ),
+                           
+                           ###############################
+                           # Bulk translation summary
+                           ###############################
+                           
                            conditionalPanel(
                              condition = "input.submit_bulk_translation > 0",
                              fluidRow(
                                column(width = 12,
                                       h3("Translation Summary:"),
                                       DTOutput("bulk_translation_summary")))
-                                      #tableOutput("bulk_translation_summary")))
                            ),
+                           
+                           ###############################
+                           # Bulk translation output
+                           ###############################
+                           
                            fluidRow(
                              column(width = 12,
                                     h3("Translated Sequences:"),
@@ -425,14 +490,27 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                                       div(style = "text-align: right;",
                                           actionButton("copy_bulk_translation", "Copy to Clipboard")))))
                   ),
+                  
+                  ###########################
+                  # Tool 3 Compare Sets
+                  ############################
+                  
                   tabPanel(
                     "Compare Sets",
+    
+                    #################
+                    # Page header
+                    #################
                     
                     tags$h3("Compare Sets"),
                     tags$p(
                       "Compare two or three sets to identify shared and unique items. Useful for gene names, IDs, genomic coordinates and other lists. Enter each list with one item per line. The results include a Venn diagram and a summary of items shared between lists.",
                       style = "font-weight: normal;"
                     ),
+                    
+                    ####################
+                    # Set selection
+                    ####################
                     
                     tags$h3("Number of Sets:"),
                     radioButtons(
@@ -447,7 +525,9 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                       style = "font-style: italic; color: #8b8b8b;"
                     ),
                     
-                    # Layout for two sets
+                    ############################
+                    # Text Input: Two sets
+                    ############################
                     conditionalPanel(
                       condition = "input.no_sets == '2 Sets'",
                       fluidRow(
@@ -472,7 +552,10 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                       )
                     ),
                     
-                    # Layout for three sets
+                    ############################
+                    # Text Input: Three sets
+                    ############################
+                    
                     conditionalPanel(
                       condition = "input.no_sets == '3 Sets'",
                       fluidRow(
@@ -505,6 +588,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                         )
                       )
                     ),
+                    
+                    ############################
+                    # Case sensitive selection
+                    ############################
+                    
                     tags$div(
                       tags$p(
                         "If case sensitive is selected, GENE1 and gene1 will be treated as different entries.",
@@ -516,11 +604,20 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                         value = FALSE
                       )
                     ),
+                    
+                    #################
+                    # Submit input
+                    #################
                     actionButton(
                       "submit_compare_sets",
                       "Compare Sets",
                       class = "btn-primary"
                     ),
+                    
+                    #######################
+                    # Output Filter Table
+                    #######################
+                    
                     conditionalPanel(
                       condition = "input.submit_compare_sets > 0",
                       fluidRow(
@@ -575,16 +672,92 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     )
                   ),
                   
-                  tabPanel("Summarise Dataset", "This feature will be built soon"),
-                  tabPanel("Get Subsequence", "This feature will be built soon"),
-  
-                ) # navbarPage
-) # fluidPage
+                  #####################################
+                  # Tool 4: Get reverse complement
+                  #####################################
+                  
+                  tabPanel("Reverse Complement",
+                           
+                           ##########################
+                           # Sequence Type Selection
+                           ##########################
+                           
+                           tags$h3("Sequence type:"),
+                           radioButtons(
+                             "sequence_type",
+                             label = tags$label(
+                               "Please select your sequence type. If you select RNA, uracil (U) will be used instead of thymine (T) and paired with adenine (A).",
+                               style = "font-weight: normal;"
+                             ),
+                             choices = c("DNA", "RNA"),
+                             selected = "DNA",
+                             inline = TRUE
+                           ),
+                           
+                           ###################
+                           # Input sequence
+                           ###################
+                           
+                           fluidRow(
+                             column(width = 12,
+                                    tags$h3("Input Sequence:"),
+                                    textAreaInput(
+                                      "txt1",
+                                      tags$label("Please enter your nucleotide sequence in the text box below. Fasta headers are accepted. Please enter one sequence at a time.",
+                                                 style = "font-weight: normal;"),
+                                      "",
+                                      width = "100%",
+                                      rows = 10
+                                    ),
+                                    actionButton("submit_reverse_comp", "Submit")
+                             )
+                           ),
+                           
+                           ############################
+                           # Reverse complement output
+                           ############################
+                           
+                           fluidRow(
+                             column(width = 12,
+                                    
+                                    h3("Reverse Complement:"),
+                                    uiOutput("txtout"),
+                                    
+                                    # Copy to Clipboard button
+                                    conditionalPanel(
+                                      condition = "input.submit_reverse_comp > 0",
+                                      div(
+                                        style = "text-align: right;",
+                                        actionButton("copy_sequence", "Copy to Clipboard"))
+                                    ),
+                                    
+                                    # Reverse complement diagram
+                                    condition = "input.submit_reverse_comp > 0",
+                                    h3("How It Works:", style = "margin-top: 60px;padding-bottom: 20px"),
+                                    
+                                    tags$div(
+                                      style = "text-align: left; margin-top: 20px; padding-bottom: 100px;",
+                                      tags$img(
+                                        src = "Reverse-complement.svg",
+                                        style = "width: 60%; height: auto;"))))
+                  ),
+                  
+                  ##############################################
+                  # Placeholders for additional tabs/features
+                  ##############################################
+                  
+                  #tabPanel("Summarise Dataset", "This feature will be built soon"),
+                  #tabPanel("Get Subsequence", "This feature will be built soon"),
+                  
+                ) # end navbarPage
+) # end fluidPage
 
 
+
+##########################
 # Define server function
+##########################
 
-# Define server function
 server <- function(input, output) {
   codon_table <- data.frame(
     Codon = c(
@@ -977,11 +1150,23 @@ server <- function(input, output) {
     
     tags$pre(translation_data()$translations)
   })
+  
   # Display translation summary
   output$translation_summary <- renderTable({
+    
+    if (input$submit_translation == 0 || nrow(translation_data()$summary) == 0) {
+      return(data.frame(
+        Frame = c("Frame 1", "Frame 2", "Frame 3",
+                  "Frame 4", "Frame 5", "Frame 6"),
+        Length = rep("-", 6),
+        Amino_Acids = rep("-", 6)
+      ))
+    }
+    
     summary <- translation_data()$summary
     colnames(summary) <- gsub("_", " ", colnames(summary))
     summary
+    
   }, digits = 0, align = "c")
   
   
