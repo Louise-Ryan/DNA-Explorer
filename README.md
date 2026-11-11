@@ -12,6 +12,8 @@ These tools come up regularly during bioinformatics workflows, but can often req
 
 **Try it here:** 🌐 [DNA Tools](https://louryan.shinyapps.io/dna-tools/)
 
+>Note, the application is hosted on shinyapps.io and may take a few moments to load when accessed after a period of inactivity.
+
 <br>
 
 ## 📖 Contents
